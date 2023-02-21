@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login Form</title>
+    </head>
+    <body>
+        <center>
+            <h3>Login to Wiki</h3>
+            <form action= "" method= "POST">
+                <label> Username </label>
+                <input type="text" name="username" value={{request.form.username}}>
+                <label> Password </label>
+                <input type= "password" name="password" value={{request.form.password}}>
+                <input type = "submit" name= "submit_to_login" value = "Login" background = "grey">
+            <!-- <table>
+                <tr>
+                    <td>Username:</td>
+                    <td> 
+                        <input type = "text" placeholder="Username" name = "username" value = {{request.form.username}} style="width: 200px;"> 
+                    </td>
+                </tr>
+                <tr>
+                    <td>Password:</td>
+                    <td> <input type = "password" placeholder="Password" name = "password"  value = {{request.form.password}} style="width: 200px;"</td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type = "submit" name= "submit_to_login" value = "Login" background = "grey">
+                    </td>
+                    <td>
+                        New to NetflixSeries Wiki? <a href "">Forgotten password?</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <a href "">Make account</a> 
+                    </td>
+                </tr>
+            </table> -->
+            </form>
+        </center>
+    </body>
+</html>

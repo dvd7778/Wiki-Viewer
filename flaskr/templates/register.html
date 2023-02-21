@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Registration Form</title>
+    </head>
+    <body>
+        <center>
+            <h3>Sign up to NetflixSeries Wiki</h3>
+            <form action= "sign_page.php" method= "post">
+            <table>
+                <tr>
+                    <td> Username:</td>
+                    <td> <input type = "text" placeholder="Enter name" name = "username" style="width: 200px;"> 
+                    </td>
+                </tr>
+                <tr>
+                    <td> Password: </td>
+                    <td> <input type = "password" placeholder="Enter password" name = "password" style="width: 200px;"> </td>
+                </tr><tr>
+                    <td> Confirm Password: </td>
+                    <td> <input type = "password" placeholder="Confirm password" name = "confirm_user_password" style="width: 200px;"> </td>
+                </tr>
+                <tr>
+                    <td> Email: </td>
+                    <td> <input type = "email" placeholder="Enter Email" name = "user email" style="width: 200px;"> </td>
+                </tr>
+                <tr>
+                    <td> Phone: </td>
+                    <td> <input type = "phone" placeholder="57********" name = "user phone" maxlength="10" style="width: 200px;"></td>
+                </tr>
+                <tr>
+                    <td> Have Netflix Account?: </td>
+                </tr>
+                <tr>
+                    <td> 
+                        <input type = "radio" name="account option"> Yes
+                        <input type = "radio" name="account option"> No
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type = "submit" name= "submit_to_login" value = "SignUp">
+                    </td>
+                    <td>
+                        Already Registered? <a href "">Login here</a>
+                    </td>
+                </tr>
+            </table>
+            </form>
+        </center>
+    </body>
+</html>
