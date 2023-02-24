@@ -1,6 +1,8 @@
 from flask import render_template, redirect,url_for
 from flask import request
 from flask_login import login_user, current_user, logout_user, login_required
+from flaskr.backend import Backend
+
 # from .forms import RegisterForm, LoginForm
 def make_endpoints(app):
 
@@ -37,6 +39,19 @@ def make_endpoints(app):
     def logout():
         logout_user()
         return redirect(url_for('home'))
+
+    @app.route('/upload', methods= ['GET'])
+    def upload_page():
+        return render_template('upload.html')
+
+    @app.route('/upload', methods= ['POST'])
+    def upload_file():
+        if request.method == 'POST':
+            f = request.files['file']
+            b = Backend()
+            b.upload(f.filename, f.stream.read())
+            return 'file uploaded successfully'
+
     
 
     
