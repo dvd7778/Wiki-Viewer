@@ -1,5 +1,6 @@
 # TODO(Project 1): Implement Backend according to the requirements.
 from google.cloud import storage
+import hashlib
 class Backend:
 
     def __init__(self):
@@ -18,14 +19,40 @@ class Backend:
         with blob.open('wb') as f:
             f.write(data)
 
-    def sign_up(self):
-        pass
-
-    def sign_in(self):
-        pass
+    """
+    It stores password inside the file which named after each username in the gcs bucket. 
+    """
+    def sign_up(self,file_userInfo,data):
+        storage_client = storage.Client()
+        bucket_userInfo = storage_client.bucket('users-passwords')
+        filename = file_userInfo + ".txt"
+        stats = storage.Blob(bucket = bucket_userInfo, name = filename).exists(storage_client)
+        if not stats:
+            blob = bucket_userInfo.blob(filename)
+            blob.upload_from_string(data)
+        return "Username Taken!"
+    """
+    It checks for the username by name of the file if it exists and then proceeds to check user credential inside the file.
+    If it matches, lets the user login else does not.
+    """
+    def sign_in(self,username,password):
+        storage_client = storage.Client()
+        bucket_name = storage_client.bucket('users-passwords')
+        filename = username + ".txt"
+        blob = bucket_name.blob(filename)
+        stats = storage.Blob(bucket = bucket_name, name = filename).exists(storage_client)
+        if stats: 
+            entered_password = hashlib.blake2b(password.encode()).hexdigest()
+            stored_password = blob.download_as_text()
+            if entered_password == stored_password:
+                return True
+        return False
 
     def get_image(self, bucket_name, blob_name):
         pass
 
 # b = Backend()
 # b.upload('pages.py', 'Hello World!!')
+
+# b= Backend()
+# b.sign_up('barsha',"Flask")

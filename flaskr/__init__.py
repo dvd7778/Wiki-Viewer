@@ -1,7 +1,7 @@
 from flaskr import pages
 
 from flask import Flask
-
+from flask_login import LoginManager
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
@@ -18,6 +18,7 @@ def create_app(test_config=None):
         SECRET_KEY='dev',
     )
 
+
     if test_config is None:
         # Load the instance config, if it exists, when not testing.
         # This file is not committed. Place it in production deployments.
@@ -29,4 +30,5 @@ def create_app(test_config=None):
     # TODO(Project 1): Make additional modifications here for logging in, backends
     # and additional endpoints.
     pages.make_endpoints(app)
+    
     return app
