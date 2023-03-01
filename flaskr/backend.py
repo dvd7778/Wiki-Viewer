@@ -1,17 +1,19 @@
 # TODO(Project 1): Implement Backend according to the requirements.
 from google.cloud import storage
 import hashlib
+
+# Class for backend objects.
 class Backend:
 
     def __init__(self):
         pass
-        
+    # Gets an uploaded page from the content bucket.  
     def get_wiki_page(self, name):
         pass
-
+    # Gets the names of all pages from the content bucket.
     def get_all_page_names(self):
         pass
-
+    # Adds data to the content bucket.
     def upload(self, filename, data):
         storage_client = storage.Client()
         bucket = storage_client.bucket('wiki_content')
@@ -47,7 +49,7 @@ class Backend:
             if entered_password == stored_password:
                 return True
         return False
-
+    # Gets an image from the content bucket.
     def get_image(self, bucket_name, blob_name):
         pass
 
