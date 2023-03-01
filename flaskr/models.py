@@ -10,7 +10,6 @@ I have to work on this one - Barsha
 @login_manager.user_loader
 def load_user(user_id):
     return User.get_id(user_id)
-    pass
 class User():
     def is_authenticated(self):
         return True

@@ -32,6 +32,7 @@ def make_endpoints(app):
         if form.validate_on_submit():
             username = form.email.data
             password = form.password.data
+            username = username.lower()
             hashed_password = hashlib.blake2b(password.encode()).hexdigest()
             b = Backend()
             message = b.sign_up(username,hashed_password)
@@ -51,6 +52,7 @@ def make_endpoints(app):
         form = LoginForm()
         if form.validate_on_submit():
             username = form.email.data
+            username = username.lower()
             password = form.password.data
             b = Backend()
             check_if_correct = b.sign_in(username,password)
