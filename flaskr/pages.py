@@ -15,10 +15,15 @@ def make_endpoints(app):
         return render_template("main.html")
 
     # TODO(Project 1): Implement additional routes according to the project requirements.
-
+    @app.route("/pages")
+    def pages():
+        b = Backend()
+        pages = b.get_all_page_names()
+        return render_template('pages.html', title = "Wiki Pages", pages = pages)
+        
     @app.route("/about")
     def about():
-        return render_template('about.html', title = "About this page")
+        return render_template('about.html', title = "About this Wiki")
     
     """
     This is the route for the registration page
