@@ -1,10 +1,18 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>About This Wiki</title>
-    </head>
+        <title>Upload</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+
+<body style="text-align: center">
+    <ul class="nav">
+        <li><a href="/">Home</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/upload">Upload</a></li>
+        <li><a href="/register">Register</a></li>
+      </ul>
     <body>
-        <center>
             <h3>About this Wiki</h3>
             <!-- TODO(Project 1): Add info about the wiki. -->
                 <div>
@@ -14,11 +22,17 @@
                 <div>
                     David Castillo
                     <div>
+                    <img src="/get_image/David_Castillo.jpg" style="width:500px;height:600px;" /> <br>
+                    </div>
                     Barsha Chaudhary
                     </div>
+                    <img src="/get_image/Barsha_Chaudhary.jpg" style="width:500px;height:600px;"/> <br>
+                    <div>
                     Devin Griffin
+                    </div>
+                    <img src="/get_image/Devin_Griffin.jpg"  style = "width:500px;height:600px;"/>
                 </div>
             <!-- TODO(Project 1): Add team members and pictures to about page. -->
-        </center>
+        
     </body>
 </html>

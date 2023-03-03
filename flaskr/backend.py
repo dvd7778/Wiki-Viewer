@@ -1,6 +1,7 @@
 # TODO(Project 1): Implement Backend according to the requirements.
 from google.cloud import storage
 import hashlib
+from io import BytesIO
 
 # Class for backend objects.
 class Backend:
@@ -16,7 +17,7 @@ class Backend:
             filename = name + ".txt"
             blob = bucket.get_blob(filename)
             return blob
-
+    # Gets the names of all pages from the content bucket.
     def get_all_page_names(self):
         storage_client = storage.Client()
         bucket = storage_client.bucket('wiki_content')
@@ -26,7 +27,7 @@ class Backend:
             if blob.name[:13] != "About Images/":
                 page_names.append(blob.name)
         return page_names
-
+    # Adds data to the content bucket.
     def upload(self, filename, data):
         storage_client = storage.Client()
         bucket = storage_client.bucket('wiki_content')
@@ -63,11 +64,16 @@ class Backend:
                 return True
         return False
     # Gets an image from the content bucket.
-    def get_image(self, bucket_name, blob_name):
-        pass
+    def get_image(self, image_file):
+        storage_client = storage.Client()
+        bucket = storage_client.bucket('wiki_content')
+        blob = bucket.get_blob(image_file)
+        with blob.open('rb') as f:
+            return BytesIO(f.read())
 
-# b = Backend()
+b = Backend()
 # b.upload('pages.py', 'Hello World!!')
+#print(b.get_image('headshot.jpg'))
 
 # b= Backend()
 # b.sign_up('barsha',"Flask")

@@ -1,10 +1,14 @@
-from flask import render_template, redirect,url_for, flash
+from flask import render_template, redirect,url_for, flash, send_file
 from flask import request
 from flask_login import login_user, current_user, logout_user, login_required
 from flaskr.backend import Backend
 from flaskr.forms import RegisterForm, LoginForm
 from .forms import RegisterForm, LoginForm
 import hashlib
+from PIL import Image
+import base64
+import io
+#import imageio as iio
 def make_endpoints(app):
 
     # Flask uses the "app.route" decorator to call methods when users
@@ -24,7 +28,14 @@ def make_endpoints(app):
     @app.route("/about")
     def about():
         return render_template('about.html', title = "About this Wiki")
-    
+
+    @app.route('/get_image/<filename>')
+    def retreive_image(filename):
+        b = Backend()
+        return send_file(b.get_image(filename), mimetype='image/jpeg')
+
+
+
     """
     This is the route for the registration page
     Passing the username and hashed-password to the sign-up method in Backend

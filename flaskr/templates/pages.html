@@ -1,14 +1,22 @@
 <!DOCTYPE html>
 <html>
-    <head>
-       <title>Wiki Pages</title> 
+    <html>
+        <head>
+            <title>Wiki Pages</title>
+            <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     </head>
+    
+    <body style="text-align: center">
+        <ul class="nav">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/upload">Upload</a></li>
+            <li><a href="/register">Register</a></li>
+          </ul>
     <body>
-        <center>
             <h3>Pages in NetflixSeries</h3>
                 {% for page in pages %}
                 <li>{{page}}</li>
                 {% endfor %}
-        </center>
     </body>
 </html>

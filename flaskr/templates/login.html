@@ -2,9 +2,17 @@
 <html>
     <head>
         <title>Login Form</title>
-    </head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+
+<body style="text-align: center">
+    <ul class="nav">
+        <li><a href="/">Home</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/upload">Upload</a></li>
+        <li><a href="/register">Register</a></li>
+      </ul>
     <body>
-        <center>
             {% block content%}
             {% with messages = get_flashed_messages() %}
                 {% if messages %}
@@ -24,6 +32,5 @@
                 <input type = "submit" name= "submit_to_signup" value = "Login">
             </form>
             {% endblock%}
-        </center>
     </body>
 </html>

@@ -1,10 +1,18 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Registration Form</title>
-    </head>
+        <title>Register</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+
+<body style="text-align: center">
+    <ul class="nav">
+        <li><a href="/">Home</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/upload">Upload</a></li>
+        <li><a href="/register">Register</a></li>
+      </ul>
     <body>
-        <center>
             <h3>Sign up to NetflixSeries Wiki</h3>
             <form action= "" method= "POST", enctype="multipart/form-data">
                 {{ form.csrf_token }}
@@ -18,6 +26,5 @@
                     <input type = "radio" name="account option"> No
                 <input type = "submit" name= "submit_to_login" value = "SignUp" >
             </form>
-        </center>
     </body>
 </html>
