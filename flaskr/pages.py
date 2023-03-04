@@ -24,6 +24,14 @@ def make_endpoints(app):
         b = Backend()
         pages = b.get_all_page_names()
         return render_template('pages.html', title = "Wiki Pages", pages = pages)
+
+    @app.route("/pages/<filename>")
+    def parametrized_page(filename):
+        b = Backend()
+        text = b.get_wiki_page(filename)
+        if not text:
+            return 'This page does not exist.'
+        return text
         
     @app.route("/about")
     def about():
@@ -33,8 +41,6 @@ def make_endpoints(app):
     def retreive_image(filename):
         b = Backend()
         return send_file(b.get_image(filename), mimetype='image/jpeg')
-
-
 
     """
     This is the route for the registration page

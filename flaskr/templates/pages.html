@@ -15,8 +15,10 @@
           </ul>
     <body>
             <h3>Pages in NetflixSeries</h3>
-                {% for page in pages %}
-                <li>{{page}}</li>
-                {% endfor %}
+                <ul>
+                    {% for page in pages %}
+                    <li><a href="https://8080-cs-1047100594699-default.cs-us-east1-pkhd.cloudshell.dev/pages/{{page}}">{{page}}</a></li>
+                    {% endfor %}
+                </ul>
     </body>
 </html>

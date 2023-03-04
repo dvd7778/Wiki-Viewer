@@ -9,23 +9,25 @@ class Backend:
     def __init__(self):
         pass
     # Gets an uploaded page from the content bucket.  
-    def get_wiki_page(self, name):
+    def get_wiki_page(self, filename):
         page_names = self.get_all_page_names()
-        if name in page_names:
+        if filename in page_names:
             storage_client = storage.Client()
             bucket = storage_client.bucket('wiki_content')
-            filename = name + ".txt"
-            blob = bucket.get_blob(filename)
-            return blob
-    # Gets the names of all pages from the content bucket.
+            blob = bucket.get_blob(filename + ".txt")
+            text = blob.download_as_string()
+            text_str = str(text, "UTF-8")
+            return text_str
+        return None
+
     def get_all_page_names(self):
         storage_client = storage.Client()
         bucket = storage_client.bucket('wiki_content')
         blobs = bucket.list_blobs()
         page_names = []
         for blob in blobs:
-            if blob.name[:13] != "About Images/":
-                page_names.append(blob.name)
+            if blob.name[:13] != "About Images/" and blob.name[-4:] != ".jpg" and blob.name[-4:] != ".png":
+                page_names.append(blob.name[:-4])
         return page_names
     # Adds data to the content bucket.
     def upload(self, filename, data):
