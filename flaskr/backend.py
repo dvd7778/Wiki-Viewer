@@ -15,9 +15,9 @@ class Backend:
             storage_client = storage.Client()
             bucket = storage_client.bucket('wiki_content')
             blob = bucket.get_blob(filename + ".txt")
-            text = blob.download_as_string()
-            text_str = str(text, "UTF-8")
-            return text_str
+            file = blob.open()
+            text = file.readlines()
+            return text
         return None
 
     def get_all_page_names(self):

@@ -12,13 +12,10 @@
             <li><a href="/about">About</a></li>
             <li><a href="/upload">Upload</a></li>
             <li><a href="/register">Register</a></li>
-          </ul>
-    <body>
-            <h3>Pages in NetflixSeries</h3>
-                <ul>
-                    {% for page in pages %}
-                    <li><a href="https://8080-cs-1047100594699-default.cs-us-east1-pkhd.cloudshell.dev/pages/{{page}}">{{page}}</a></li>
-                    {% endfor %}
-                </ul>
-    </body>
+        </ul>
+        <h1>Pages in NetflixSeries</h1>
+            {% for page in pages %}
+            <div><a href="{{url_for('parametrized_pages', filename=page)}}">{{page}}</a></div>
+            {% endfor %}
+</body>
 </html>

@@ -26,12 +26,12 @@ def make_endpoints(app):
         return render_template('pages.html', title = "Wiki Pages", pages = pages)
 
     @app.route("/pages/<filename>")
-    def parametrized_page(filename):
+    def parametrized_pages(filename):
         b = Backend()
-        text = b.get_wiki_page(filename)
-        if not text:
+        text_lines = b.get_wiki_page(filename)
+        if not text_lines:
             return 'This page does not exist.'
-        return text
+        return render_template('parametrized_pages.html', filename = filename, text_lines = text_lines)
         
     @app.route("/about")
     def about():
