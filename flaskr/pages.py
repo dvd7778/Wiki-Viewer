@@ -8,15 +8,20 @@ import hashlib
 from PIL import Image
 import base64
 import io
+from flaskr.models import User
 #import imageio as iio
 def make_endpoints(app):
 
     # Flask uses the "app.route" decorator to call methods when users
     # go to a specific route on the project's website.
     @app.route("/")
+    @app.route("/main")
+    def main():
+        return render_template("main.html")
+
     @app.route("/home")
     def home():
-        return render_template("main.html")
+        return render_template("home.html", title = "Home", data = "User")
 
     # TODO(Project 1): Implement additional routes according to the project requirements.
     @app.route("/pages")
@@ -54,10 +59,12 @@ def make_endpoints(app):
         if form.validate_on_submit():
             username = form.email.data
             password = form.password.data
+            first_name = form.first_name.data
+            last_name = form.last_name.data
             username = username.lower()
             hashed_password = hashlib.blake2b(password.encode()).hexdigest()
             b = Backend()
-            message = b.sign_up(username,hashed_password)
+            message = b.sign_up(username,hashed_password,first_name,last_name)
             if message == "Username Taken!":
                 flash(f"This username is taken")
                 return render_template("register.html", title = "SignUp",form = form)
@@ -74,17 +81,21 @@ def make_endpoints(app):
         form = LoginForm()
         if form.validate_on_submit():
             username = form.email.data
-            username = username.lower()
+            username_lower = username.lower()
             password = form.password.data
             b = Backend()
-            check_if_correct = b.sign_in(username,password)
+            check_if_correct = b.sign_in(username_lower,password)
             if check_if_correct:  
                 flash('You have been logged in!', "success")
-                return redirect(url_for('home'))
+                user = User(username)
+                userInfo = user.getId()
+                info = b.get_user_info(userInfo)
+                first_name = info["Firstname"]            
+                return render_template('home.html', title = "Home", data = first_name )
             else:
                 flash('Login Unsuccessful. Please check username and password', "danger")
         return render_template('login.html', title='Login', form=form)
-
+    
     @app.route("/logout")
     def logout():
         flash("You have been logged out!","info")

@@ -1,18 +1,26 @@
-from flask_login import LoginManager
+from flask_login import LoginManager,UserMixin
 from flask import Flask
-app = Flask(__name__)
-login_manager = LoginManager(app)
-
-
 """
 I have to work on this one - Barsha
 """
-@login_manager.user_loader
-def load_user(user_id):
-    return User.get_id(user_id)
-class User():
+
+class User(UserMixin):
+    def __init__(self,username, active = True):
+        self.username = username
+        self.active = active
+    def getId(self):
+        current_user = self.username
+        return current_user
+    def __str__(self):
+        return "%s"%(self.username)
+    def is_active(self):
+        return self.active
+    def __repr__(self):
+        return f"User('{self.username}')"
     def is_authenticated(self):
         return True
-    def get_id(self):
-        return self.id
+    def logout_user(self):
+        return False
+        
+    
         
