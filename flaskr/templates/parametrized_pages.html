@@ -1,23 +1,8 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>{{filename}}</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-    </head>
-    <body style="text-align: center">
-        <ul class="nav">
-            <li><a href="/home">Home</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/upload">Upload</a></li>
-            <!-- <li><a href="/register">Register</a></li> -->
-            <li><a href="/pages">Pages</a></li>
-            <!-- <li><a href="/login">Login</a></li> -->
-            <li><a href="/logout">Logout</a></li>
-          </ul>
-    <body>
+{% extends "layout.html" %}
+{% block title %}Best Netflix TV Shows{% endblock %}
+{% block content %}
         <h1>{{filename}}</h1>
             {% for line in text_lines %}
             <div>{{line}}</div>
             {% endfor %}
-    </body>
-</html>
+{%endblock%}

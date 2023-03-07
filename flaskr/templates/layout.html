@@ -2,26 +2,36 @@
 <html>
 
 <head>
-        <title> Home </title>
+        <title> {% block title %}{% endblock %} </title>
         <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 </head>
 
 <body style="text-align: center">
+    
     <ul class="nav">
         <li><a href="/home">Home</a></li>
-        <li><a href="/about">About</a></li>
-        <li><a href="/upload">Upload</a></li>
-        <!-- <li><a href="/register">Register</a></li> -->
         <li><a href="/pages">Pages</a></li>
+        <li><a href="/about">About</a></li>
+        {% if not current_user.is_authenticated %}
+        <li><a href="/login">Login</a></li>
+        <li><a href="/register">Register</a></li>
+        {% endif %}
+
+        {% if current_user.is_authenticated %}
+        Welcome {{ current_user.name }}!
+       
+        
+        <li><a href="/upload">Upload</a></li>
         <li><a href="/logout">Logout</a></li>
-        <!-- <li><a href="/login">Login</a></li> -->
+        {% endif %}
       </ul>
 
-    <h1> Hi, {{data}}</h1>
+      <div id="content">{% block content %}{% endblock %}</div>
+    <!-- <h1> Hi, {{data}} </h1>
     <div style="background-color:powderblue;">
         <div>       
             Here you will find the best TV shows on Netflix, ranked and with a synopsis of each show.
         </div>
-    </div>
+    </div> -->
 </body>
 </html>

@@ -1,23 +1,8 @@
-<!DOCTYPE html>
-<html>
-    <html>
-        <head>
-            <title>Wiki Pages</title>
-            <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-    </head>
-    
-    <body style="text-align: center">
-        <ul class="nav">
-            <li><a href="/home">Home</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/upload">Upload</a></li>
-            <li><a href="/pages">Pages</a></li>
-            <li><a href="/logout">Logout</a></li>
-            <!-- <li><a href="/register">Register</a></li> -->
-        </ul>
+{% extends "layout.html" %}
+{% block title %}Best Netflix TV Shows{% endblock %}
+{% block content %}
         <h1>Pages in NetflixSeries</h1>
             {% for page in pages %}
             <div><a href="{{url_for('parametrized_pages', filename=page)}}">{{page}}</a></div>
             {% endfor %}
-</body>
-</html>
+{%endblock%}

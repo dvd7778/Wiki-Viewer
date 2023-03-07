@@ -1,14 +1,14 @@
 from flask_login import LoginManager,UserMixin
 from flask import Flask
 """
-I have to work on this one - Barsha
+User class.
 """
 
 class User(UserMixin):
     def __init__(self,username, active = True):
         self.username = username
         self.active = active
-    def getId(self):
+    def get_id(self):
         current_user = self.username
         return current_user
     def __str__(self):
@@ -21,6 +21,11 @@ class User(UserMixin):
         return True
     def logout_user(self):
         return False
+    def set_name(self, name):
+        self.name = name
+    def get_name(self):
+        return self.name
+
         
     
         

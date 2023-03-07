@@ -1,23 +1,7 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Upload</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-</head>
-
-<body style="text-align: center">
-    <ul class="nav">
-        <li><a href="home">Home</a></li>
-        <li><a href="/about">About</a></li>
-        <li><a href="/upload">Upload</a></li>
-        <li><a href="/pages">Pages</a></li>
-        <li><a href="/logout">Logout</a></li>
-
-        <!-- <li><a href="/register">Register</a></li> -->
-      </ul>
-    <body>
+{% extends "layout.html" %}
+{% block title %}About{% endblock %}
+{% block content %}
             <h3>About this Wiki</h3>
-            <!-- TODO(Project 1): Add info about the wiki. -->
                 <div>
                     It contains the best TV shows you can find on Netflix.
                 </div>
@@ -35,7 +19,5 @@
                     </div>
                     <img src="/get_image/Devin_Griffin.jpg"  style = "width:500px;height:600px;"/>
                 </div>
-            <!-- TODO(Project 1): Add team members and pictures to about page. -->
         
-    </body>
-</html>
+            {%endblock%}

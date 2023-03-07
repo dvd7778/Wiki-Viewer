@@ -3,6 +3,7 @@ from flaskr import pages
 from flask import Flask
 from flask_login import LoginManager
 import logging
+
 logging.basicConfig(level=logging.DEBUG)
 
 # The flask terminal command inside "run-flask.sh" searches for
@@ -29,5 +30,8 @@ def create_app(test_config=None):
 
     # TODO(Project 1): Make additional modifications here for logging in, backends
     # and additional endpoints.
-    pages.make_endpoints(app)
+    
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    pages.make_endpoints(app, login_manager)    
     return app

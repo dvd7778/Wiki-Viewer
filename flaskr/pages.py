@@ -5,12 +5,11 @@ from flaskr.backend import Backend
 from flaskr.forms import RegisterForm, LoginForm
 from .forms import RegisterForm, LoginForm
 import hashlib
-from PIL import Image
-import base64
-import io
+#from PIL import Image
+#import io
 from flaskr.models import User
-#import imageio as iio
-def make_endpoints(app):
+
+def make_endpoints(app, login_manager):
 
     # Flask uses the "app.route" decorator to call methods when users
     # go to a specific route on the project's website.
@@ -21,7 +20,7 @@ def make_endpoints(app):
 
     @app.route("/home")
     def home():
-        return render_template("home.html", title = "Home", data = "User")
+        return render_template("main.html", title = "Home", data = "User")
 
     # TODO(Project 1): Implement additional routes according to the project requirements.
     @app.route("/pages")
@@ -88,23 +87,36 @@ def make_endpoints(app):
             if check_if_correct:  
                 flash('You have been logged in!', "success")
                 user = User(username)
-                userInfo = user.getId()
+                userInfo = user.get_id()
                 info = b.get_user_info(userInfo)
-                first_name = info["Firstname"]            
-                return render_template('home.html', title = "Home", data = first_name )
+                first_name = info["Firstname"]    
+                user.set_name(first_name)
+                login_user(user)        
+                return render_template('main.html', title = "Home", data = first_name )
             else:
                 flash('Login Unsuccessful. Please check username and password', "danger")
         return render_template('login.html', title='Login', form=form)
-    
+    # Logins the user to the Flask
+    @login_manager.user_loader
+    def load_user(user_id):
+        b = Backend()
+        user = User(user_id)
+        info = b.get_user_info(user_id)
+        first_name = info["Firstname"]    
+        user.set_name(first_name)
+        login_user(user)   
+        return user
+    # Logouts the user from Flask
     @app.route("/logout")
     def logout():
+        logout_user()
         flash("You have been logged out!","info")
         return redirect(url_for('login'))
-
+    # Returns html for upload
     @app.route('/upload', methods= ['GET'])
     def upload_page():
         return render_template('upload.html')
-
+    # Route for uploading files to the GCS bucket
     @app.route('/upload', methods= ['POST'])
     def upload_file():
         if request.method == 'POST':

@@ -1,18 +1,6 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Register</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-</head>
-
-<body style="text-align: center">
-    <ul class="nav">
-        <li><a href="/">Main</a></li>
-        <!-- <li><a href="/about">About</a></li>
-        <li><a href="/upload">Upload</a></li> -->
-        <li><a href="/login">Login</a></li>
-      </ul>
-    <body>
+{% extends "layout.html" %}
+{% block title %}Upload{% endblock %}
+{% block content %}
         <center>
             <h3>Sign up to NetflixSeries Wiki</h3>
             <form action= "" method= "POST", enctype="multipart/form-data">
@@ -37,5 +25,4 @@
                 <input type = "submit" name= "submit_to_login", style="height:30px; width:60px", value = "SignUp" >
             </form>
         </center>            
-    </body>
-</html>
+{%endblock%}

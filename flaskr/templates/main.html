@@ -1,27 +1,11 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-        <title>Best Netlfix TV Shows</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-</head>
-
-<body style="text-align: center">
-    <ul class="nav">
-        <li><a href="/">Main</a></li>
-        <!-- <li><a href="/about">About</a></li>
-        <li><a href="/upload">Upload</a></li> -->
-        <li><a href="/register">Register</a></li>
-        <!-- <li><a href="/pages">Pages</a></li> -->
-        <li><a href="/login">Login</a></li>
-        <!-- <li><a href="/login">Login</a></li> -->
-      </ul>
-
+{% extends "layout.html" %}
+{% block title %}Best Netflix TV Shows{% endblock %}
+{% block content %}
     <h1>Welcome to the NetflixSeries Wiki!</h1>
     <div style="background-color:powderblue;">
         <div>       
             Here you will find the best TV shows on Netflix, ranked and with a synopsis of each show.
         </div>
     </div>
-</body>
-</html>
+    {% endblock %}
+
