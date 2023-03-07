@@ -52,8 +52,8 @@ def make_endpoints(app, login_manager):
     """
     @app.route("/register", methods = ['GET', 'POST'])
     def register(): 
-        # if current_user.is_authenticated:
-        #     return redirect(url_for('home'))
+        if current_user.is_authenticated:
+            return redirect(url_for('home'))
         form = RegisterForm()
         if form.validate_on_submit():
             username = form.email.data
@@ -77,15 +77,18 @@ def make_endpoints(app, login_manager):
     """
     @app.route("/login", methods = ['GET','POST'])
     def login():
+        if current_user.is_authenticated:
+            return redirect(url_for('home'))
         form = LoginForm()
-        if form.validate_on_submit():
+        error = None
+        if form.validate_on_submit() and request.method == "POST":
             username = form.email.data
             username_lower = username.lower()
             password = form.password.data
             b = Backend()
             check_if_correct = b.sign_in(username_lower,password)
             if check_if_correct:  
-                flash('You have been logged in!', "success")
+                flash('You have successfully logged in!')
                 user = User(username)
                 userInfo = user.get_id()
                 info = b.get_user_info(userInfo)
@@ -94,8 +97,8 @@ def make_endpoints(app, login_manager):
                 login_user(user)        
                 return render_template('main.html', title = "Home", data = first_name )
             else:
-                flash('Login Unsuccessful. Please check username and password', "danger")
-        return render_template('login.html', title='Login', form=form)
+                error = 'Login Unsuccessful! Please check your username and password again!'
+        return render_template('login.html', title='Login', form=form, error = error)
     # Logins the user to the Flask
     @login_manager.user_loader
     def load_user(user_id):
@@ -111,6 +114,7 @@ def make_endpoints(app, login_manager):
     def logout():
         logout_user()
         flash("You have been logged out!","info")
+        flash(" Do you want to login again?")
         return redirect(url_for('login'))
     # Returns html for upload
     @app.route('/upload', methods= ['GET'])
