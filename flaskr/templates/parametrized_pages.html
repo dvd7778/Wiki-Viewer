@@ -3,6 +3,10 @@
 {% block content %}
         <h1>{{filename}}</h1>
             {% for line in text_lines %}
-            <div>{{line}}</div>
+                {% if line == ' \n' or line == '\n' %}
+                <br></br>
+                {% else %}
+                <div style="text-align: left;">{{line}}</div>
+                {% endif %}
             {% endfor %}
 {%endblock%}

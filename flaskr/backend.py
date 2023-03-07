@@ -18,6 +18,7 @@ class Backend:
             return text
         return None
 
+    # Gets the name of all of the uploaded text files
     def get_all_page_names(self):
         storage_client = storage.Client()
         bucket = storage_client.bucket('wiki_content')
