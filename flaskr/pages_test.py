@@ -20,6 +20,31 @@ def client(app):
 def test_home_page(client):
     resp = client.get("/")
     assert resp.status_code == 200
-    assert b"Hello, World!\n" in resp.data
+    assert b"Welcome to the NetflixSeries Wiki!" in resp.data
 
 # TODO(Project 1): Write tests for other routes.
+def test_upload_page(client):
+    resp = client.get('/upload')
+    assert resp.status_code == 200
+    assert b"Upload File to the Wiki" in resp.data
+
+def test_pages_page(client):
+    resp = client.get('/pages')
+    assert resp.status_code == 200
+    assert b"Pages in NetflixSeries" in resp.data
+
+def test_about_page(client):
+    resp = client.get('/about')
+    assert resp.status_code == 200
+    assert b"About this Wiki" in resp.data
+
+def test_login_page(client):
+    resp = client.get('/login')
+    assert resp.status_code == 200
+    assert b"Login to Wiki" in resp.data
+
+
+def test_register_page(client):
+    resp = client.get('/register')
+    assert resp.status_code == 200
+    assert b"Sign up to NetflixSeries Wiki" in resp.data

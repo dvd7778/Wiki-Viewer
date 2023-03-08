@@ -14,10 +14,6 @@ def make_endpoints(app, login_manager):
     # Flask uses the "app.route" decorator to call methods when users
     # go to a specific route on the project's website.
     @app.route("/")
-    @app.route("/main")
-    def main():
-        return render_template("main.html")
-
     @app.route("/home")
     def home():
         return render_template("main.html", title = "Home", data = "User")
