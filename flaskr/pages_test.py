@@ -1,4 +1,5 @@
 from flaskr import create_app
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -43,8 +44,25 @@ def test_login_page(client):
     assert resp.status_code == 200
     assert b"Login to Wiki" in resp.data
 
-
 def test_register_page(client):
     resp = client.get('/register')
     assert resp.status_code == 200
     assert b"Sign up to NetflixSeries Wiki" in resp.data
+
+def test_parametrized_pages(client):
+    filename = "TestFile"
+    resp = client.get(f'/pages/{filename}')
+    assert resp.status_code == 200
+    assert b'Page not found.' in resp.data
+    
+"""
+def test_parametrized_pages2(client):
+    filename = "TestFile"
+    filename_bytes = f'{filename}'.encode()
+    b = MagicMock()
+    b.get_wiki_page().return_value = ["This", "is", "a", "test"]
+    resp = client.get(f'/pages/{filename}')
+    assert resp.status_code == 200
+    assert filename_bytes in resp.data
+    assert b'Page does not exist.' in resp.data
+"""

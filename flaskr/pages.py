@@ -10,7 +10,7 @@ import hashlib
 from flaskr.models import User
 
 def make_endpoints(app, login_manager):
-
+    b = Backend()
     # Flask uses the "app.route" decorator to call methods when users
     # go to a specific route on the project's website.
     @app.route("/")
@@ -21,16 +21,17 @@ def make_endpoints(app, login_manager):
     # TODO(Project 1): Implement additional routes according to the project requirements.
     @app.route("/pages")
     def pages():
-        b = Backend()
+        # b = Backend()
         pages = b.get_all_page_names()
         return render_template('pages.html', title = "Wiki Pages", pages = pages)
 
     @app.route("/pages/<filename>")
     def parametrized_pages(filename):
-        b = Backend()
+        # b = Backend()
         text_lines = b.get_wiki_page(filename)
         if not text_lines:
-            return 'This page does not exist.'
+            filename = "Page not found."
+            text_lines = []
         return render_template('parametrized_pages.html', filename = filename, text_lines = text_lines)
         
     @app.route("/about")
@@ -39,7 +40,7 @@ def make_endpoints(app, login_manager):
 
     @app.route('/get_image/<filename>')
     def retreive_image(filename):
-        b = Backend()
+        # b = Backend()
         return send_file(b.get_image(filename), mimetype='image/jpeg')
 
     """
@@ -58,7 +59,7 @@ def make_endpoints(app, login_manager):
             last_name = form.last_name.data
             username = username.lower()
             hashed_password = hashlib.blake2b(password.encode()).hexdigest()
-            b = Backend()
+            # b = Backend()
             message = b.sign_up(username,hashed_password,first_name,last_name)
             if message == "Username Taken!":
                 flash(f"This username is taken")
@@ -81,7 +82,7 @@ def make_endpoints(app, login_manager):
             username = form.email.data
             username_lower = username.lower()
             password = form.password.data
-            b = Backend()
+            # b = Backend()
             check_if_correct = b.sign_in(username_lower,password)
             if check_if_correct:  
                 flash('You have successfully logged in!')
@@ -98,7 +99,7 @@ def make_endpoints(app, login_manager):
     # Logins the user to the Flask
     @login_manager.user_loader
     def load_user(user_id):
-        b = Backend()
+        # b = Backend()
         user = User(user_id)
         info = b.get_user_info(user_id)
         first_name = info["Firstname"]    
@@ -121,7 +122,7 @@ def make_endpoints(app, login_manager):
     def upload_file():
         if request.method == 'POST':
             f = request.files['file']
-            b = Backend()
+            # b = Backend()
             b.upload(f.filename, f.stream.read())
             return 'file uploaded successfully'
 
