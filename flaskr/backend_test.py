@@ -28,13 +28,15 @@ def storage_client(bucket):
     storage_client = MagicMock()
     storage_client.bucket.return_value = bucket
     return storage_client
-
+    
+# Test for backend upload method.
 def test_upload(file_stream, blob, bucket, storage_client):
     b = Backend(storage_client)
     b.upload('test.txt', 'Hello World')
     bucket.blob.assert_called_with('test.txt')
     file_stream.write.assert_called_with('Hello World')
-
+    
+# Test for backend get_image method
 def test_get_image(file_stream, blob, bucket, storage_client):
     file_stream.read.return_value = b'Image data'
     b = Backend(storage_client)
@@ -43,7 +45,8 @@ def test_get_image(file_stream, blob, bucket, storage_client):
     file_stream.read.assert_called_once()
 
 
-def test_get_all_page_names_txt(file_stream, blob, bucket, storage_client): 
+# Test for backend get_all_page_names method (text files).
+def test_get_all_page_names_txt(file_stream, blob, bucket, storage_client): ########
     blob.name = "test_blob.txt"
     b = Backend(storage_client)
     pages = b.get_all_page_names()
@@ -52,6 +55,7 @@ def test_get_all_page_names_txt(file_stream, blob, bucket, storage_client):
     bucket.list_blobs.assert_called_once()
     assert "test_blob" in pages
 
+# Test for backend get_all_page_names method (images).
 def test_get_all_page_names_jpg(file_stream, blob, bucket, storage_client):
     blob.name.return_value = "test_blob.jpg"
     b = Backend(storage_client)
@@ -59,7 +63,8 @@ def test_get_all_page_names_jpg(file_stream, blob, bucket, storage_client):
     bucket.list_blobs.assert_called_once()
     assert len(pages) == 0
 
-def test_get_wiki_page_working(file_stream, blob, bucket, storage_client):
+# Test for a successful get_wiki_page backend method.
+def test_get_wiki_page_working(file_stream, blob, bucket, storage_client): ########
     blob.name = "test.txt"
     file_stream.readlines.return_value = ["This", "is", "a", "test"]
     b = Backend(storage_client)
@@ -71,6 +76,7 @@ def test_get_wiki_page_working(file_stream, blob, bucket, storage_client):
     # file_stream.readlines.assert_called_once()
     assert text == ["This", "is", "a", "test"]
 
+# Test for an unsucessful get_wiki_page backend method.
 def test_get_wiki_page_fail(file_stream, blob, bucket, storage_client):
     file_stream.readlines.return_value = ["This", "is", "a", "test"]
     b = Backend(storage_client)
