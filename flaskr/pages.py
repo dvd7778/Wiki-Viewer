@@ -62,7 +62,7 @@ def make_endpoints(app, login_manager):
             # b = Backend()
             message = b.sign_up(username,hashed_password,first_name,last_name)
             if message == "Username Taken!":
-                flash(f"This username is taken")
+                flash(f"This Email is already Registered!")
                 return render_template("register.html", title = "SignUp",form = form)
             flash(f"Your account has been created", 'success')
             return redirect(url_for('login'))
@@ -79,11 +79,10 @@ def make_endpoints(app, login_manager):
         form = LoginForm()
         error = None
         if form.validate_on_submit() and request.method == "POST":
-            username = form.email.data
-            username_lower = username.lower()
+            username = form.email.data.lower()
             password = form.password.data
-            # b = Backend()
-            check_if_correct = b.sign_in(username_lower,password)
+            b = Backend()
+            check_if_correct = b.sign_in(username,password)
             if check_if_correct:  
                 flash('You have successfully logged in!')
                 user = User(username)

@@ -3,6 +3,13 @@
 {% block content %}
         <center>
             <h3>Sign up to NetflixSeries Wiki</h3>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for message in messages %}
+            <p>{{message}}</p>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
             <form action= "" method= "POST", enctype="multipart/form-data">
                 {{ form.csrf_token }}
                 {{ form.hidden_tag() }}
