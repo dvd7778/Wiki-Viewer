@@ -1,5 +1,6 @@
 from flaskr import create_app
 from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import pytest
 
@@ -31,13 +32,17 @@ def test_upload_page(client):
     assert resp.status_code == 200
     assert b"Upload File to the Wiki" in resp.data
 
-# Test for pages route.
+# Tests the pages page renders correctly and the list of the uploaded pages
 def test_pages_page(client):
-    resp = client.get('/pages')
-    assert resp.status_code == 200
-    assert b"Best Netflix Series" in resp.data
+    with patch('flaskr.backend.Backend.get_all_page_names') as get_all_page_names:
+        get_all_page_names.return_value = ["test", "hello"]
+        resp = client.get('/pages')
+        assert resp.status_code == 200
+        assert b"Best Netflix Series" in resp.data
+        assert b"test" in resp.data
+        assert b"hello" in resp.data
 
-# Test for about route.
+# Tests that the about page renders correctly
 def test_about_page(client):
     resp = client.get('/about')
     assert resp.status_code == 200
@@ -55,21 +60,23 @@ def test_register_page(client):
     assert resp.status_code == 200
     assert b"Sign up to NetflixSeries Wiki" in resp.data
 
-# Test for parametrized pages route.
-def test_parametrized_pages(client):
+# Tests that the parametrized pages renders a "Page not found." message when the page is not in the content bucket
+def test_parametrized_pages_fail(client):
     filename = "TestFile"
     resp = client.get(f'/pages/{filename}')
     assert resp.status_code == 200
     assert b'Page not found.' in resp.data
-    
-"""
-def test_parametrized_pages2(client):
-    filename = "TestFile"
-    filename_bytes = f'{filename}'.encode()
-    b = MagicMock()
-    b.get_wiki_page().return_value = ["This", "is", "a", "test"]
-    resp = client.get(f'/pages/{filename}')
-    assert resp.status_code == 200
-    assert filename_bytes in resp.data
-    assert b'Page does not exist.' in resp.data
-"""
+
+# Tests that the parametrized pages renders a page with the parameter file's content
+def test_parametrized_pages_working(client):
+    with patch('flaskr.backend.Backend.get_wiki_page') as get_wiki_page:
+        filename = "TestFile"
+        filename_bytes = f'{filename}'.encode()
+        get_wiki_page.return_value = ["This", "is", "a", "test"]
+        resp = client.get(f'/pages/{filename}')
+        assert resp.status_code == 200
+        assert filename_bytes in resp.data
+        assert b'This' in resp.data
+        assert b'is' in resp.data
+        assert b'a' in resp.data
+        assert b'test' in resp.data
