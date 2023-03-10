@@ -13,7 +13,10 @@ class Backend:
         self.userInfo_bucket = storage_client.bucket('users-passwords')
         self.page_names = []
 
-    # Gets an uploaded page from the content bucket.  
+    # Gets an uploaded page from the content bucket.
+    # Parameter: filename - a string with the name of the file you want to get
+    # Returns: text - a list of strings with the contents of the file you are getting
+    #          None - returns None when the file is not in the bucket 
     def get_wiki_page(self, filename):
         if filename in self.page_names:
             blob = self.content_bucket.get_blob(filename + ".txt")
@@ -22,12 +25,13 @@ class Backend:
             return text
         return None
 
-    # Gets the name of all of the uploaded text files
+    # Gets the name of all of the text files in the content bucket
+    # Return: self.page_names - a list with the names of all the text files in the bucket
     def get_all_page_names(self):
         blobs = self.content_bucket.list_blobs()
         self.page_names.clear()
         for blob in blobs:
-            if blob.name[-4:] == ".txt":
+            if blob.name[-4:] == ".txt": # Checks if the blob is a text file
                 self.page_names.append(blob.name[:-4])
         return self.page_names
     
