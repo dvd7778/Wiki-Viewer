@@ -1,25 +1,27 @@
 {% extends "layout.html" %}
 {% block title %}Upload{% endblock %}
 {% block content %}       
-            <h3>Login to Wiki</h3>
-            {% if error %}
-                <p> <strong> Error </strong> : {{error}} </p>
-            {% endif %}
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}
+    <h3>Login to Wiki</h3>
+    {% if error %}
+        <p> <strong> Error </strong> : {{error}} </p>
+    {% endif %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
             {% for message in messages %}
-            <p>{{message}}</p>
+                <p>{{message}}</p>
             {% endfor %}
-            {% endif %}
-            {% endwith %}
-            <form action= "" method= "POST" enctype="multipart/form-data">
-                {{ form.csrf_token }}
-                {{ form.hidden_tag() }}
-                <label> Email </label>
-                <input type="text" name="email" value={{request.form.email}}>
-                <label> Password </label>
-                <input type= "password" name="password" value={{request.form.password}}>
-                <input type = "submit" name= "submit_to_signup" value = "Login">
-            </form>
-            
- {%endblock%}
+        {% endif %}
+    {% endwith %}
+    <form action= "" method= "POST" enctype="multipart/form-data">
+        {{ form.csrf_token }}
+        {{ form.hidden_tag() }}
+        <label> Email </label>
+        <input type="text" name="email" value={{request.form.email}}>
+        <label> Password </label>
+        <input type= "password" name="password" value={{request.form.password}}>
+        <input type = "submit" name= "submit_to_signup" value = "Login">
+    </form>
+    {% if request.method == 'POST' and not error %}
+        <p class="message">You have successfully logged in!</p>
+    {% endif %}
+{% endblock%}

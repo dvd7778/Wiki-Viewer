@@ -1,8 +1,9 @@
 from flaskr import create_app
 from unittest.mock import MagicMock
 from unittest.mock import patch
-
+from flask import request,render_template, redirect,url_for, flash,session
 import pytest
+from flask_wtf.csrf import generate_csrf
 
 # See https://flask.palletsprojects.com/en/2.2.x/testing/ 
 # for more info on testing
@@ -54,12 +55,19 @@ def test_login_page(client):
     assert resp.status_code == 200
     assert b"Login to Wiki" in resp.data
 
+# Test for login route fail.
+def test_login_fail(client):
+    resp = client.get('/login')
+    assert resp.status_code == 200
+    assert b"Login to Wiki" in resp.data
+
 # Test for register route.
 def test_register_page(client):
-    resp = client.get('/register')
+    resp = client.get('/register')    
     assert resp.status_code == 200
     assert b"Sign up to NetflixSeries Wiki" in resp.data
-
+    assert b"Have Netflix Account?:" in resp.data
+    
 # Tests that the parametrized pages renders a "Page not found." message when the page is not in the content bucket
 def test_parametrized_pages_fail(client):
     filename = "TestFile"
@@ -80,3 +88,9 @@ def test_parametrized_pages_working(client):
         assert b'is' in resp.data
         assert b'a' in resp.data
         assert b'test' in resp.data
+
+#testing pages for login success     
+def test_login_success(client):
+    response = client.post('/login', follow_redirects=True)
+    assert response.status_code == 200
+    assert b'<p class="message">You have successfully logged in!</p>' in response.data

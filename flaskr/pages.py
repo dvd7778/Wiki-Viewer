@@ -65,12 +65,13 @@ def make_endpoints(app, login_manager):
             first_name = form.first_name.data
             last_name = form.last_name.data
             username = username.lower()
-            hashed_password = hashlib.blake2b(password.encode()).hexdigest()
+            hashed_password = b.hash_password(password)
             message = b.sign_up(username,hashed_password,first_name,last_name)
             if message == "Username Taken!":
                 flash(f"This Email is already Registered!")
                 return render_template("register.html", title = "SignUp",form = form)
             flash(f"Your account has been created", 'success')
+            flash(f"Please login to continue", 'info')
             return redirect(url_for('login'))
         return render_template("register.html", title = "SignUp",form = form)
     

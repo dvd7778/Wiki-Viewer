@@ -1,35 +1,40 @@
 {% extends "layout.html" %}
-{% block title %}Upload{% endblock %}
+
+{% block title %}Sign Up{% endblock %}
+
 {% block content %}
-        <center>
-            <h3>Sign up to NetflixSeries Wiki</h3>
-            {% with messages = get_flashed_messages() %}
+    <center>
+        <h3>Sign up to NetflixSeries Wiki</h3>
+        {% with messages = get_flashed_messages() %}
             {% if messages %}
-            {% for message in messages %}
-            <p>{{message}}</p>
-            {% endfor %}
+                {% for message in messages %}
+                    <div class="message"{% if "success" in message %} success{% elif "info" in message %} info{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
             {% endif %}
-            {% endwith %}
-            <form action= "" method= "POST", enctype="multipart/form-data">
-                {{ form.csrf_token }}
-                {{ form.hidden_tag() }}
-                <label> First name : </label>
-                <input type="text" name= "first_name", value={{request.form.first_name}}>
-                <label> Last name : </label>
-                <input type="text" name= "last_name", value={{request.form.last_name}}>
-                <br>
-                <br>
-                <label> Your Email: </label>
-                <input type="email" name= "email", value={{request.form.email}}>
-                <label> Password : </label>
-                <input type= "password" name="password", value={{request.form.password}}>
-                <br>
-               
-                <label> Have Netflix Account?: </label>
-                    <input type = "radio" name="account option"> Yes
-                    <input type = "radio" name="account option"> No
-                <br>
-                <input type = "submit" name= "submit_to_login", style="height:30px; width:60px", value = "SignUp" >
-            </form>
-        </center>            
-{%endblock%}
+        {% endwith %}
+        <form action="" method="POST" enctype="multipart/form-data">
+            {{ form.csrf_token }}
+            {{ form.hidden_tag() }}
+            <label> First name:</label>
+            <input type="text" name="first_name" value="{{ request.form.first_name }}">
+            <label> Last name:</label>
+            <input type="text" name="last_name" value="{{ request.form.last_name }}">
+            <br><br>
+            <label>Your Email:</label>
+            <input type="email" name="email" value="{{ request.form.email }}">
+            <label>Password:</label>
+            <input type="password" name="password" value="{{ request.form.password }}">
+            <br>
+            <label>Have Netflix Account?:</label>
+            <input type="radio" name="account_option" value="Yes"> Yes
+            <input type="radio" name="account_option" value="No"> No
+            <br>
+            <input type="submit" name="submit_to_login" style="height:30px; width:60px" value="SignUp">
+        </form>
+        {% if "Your account has been created" in messages %}
+        <p class="message">Your account has been created</p>
+        {% endif %}
+    </center>
+{% endblock %}
