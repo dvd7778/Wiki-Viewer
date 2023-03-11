@@ -1,7 +1,8 @@
 from flask_login import LoginManager,UserMixin
 from flask import Flask
 """
-User class.
+User class which gets username and returns unique id for the user
+Includes method like is_authenticated, logout user, get_name which are used in pages
 """
 
 class User(UserMixin):
@@ -24,7 +25,7 @@ class User(UserMixin):
     def set_name(self, name):
         self.name = name
     def get_name(self):
-        return self.name
+        return self.username
 
         
     
