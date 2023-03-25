@@ -4,6 +4,8 @@ import hashlib
 from io import BytesIO
 from flaskr import pages
 import json
+
+
 # Class for backend objects.
 class Backend:
     # Backend class constructor
@@ -16,7 +18,7 @@ class Backend:
     # Gets an uploaded page from the content bucket.
     # Parameter: filename - a string with the name of the file you want to get
     # Returns: text - a list of strings with the contents of the file you are getting
-    #          None - returns None when the file is not in the bucket 
+    #          None - returns None when the file is not in the bucket
     def get_wiki_page(self, filename):
         if filename in self.page_names:
             blob = self.content_bucket.get_blob(filename + ".txt")
@@ -31,34 +33,40 @@ class Backend:
         blobs = self.content_bucket.list_blobs()
         self.page_names.clear()
         for blob in blobs:
-            if blob.name[-4:] == ".txt": # Checks if the blob is a text file
+            if blob.name[-4:] == ".txt":  # Checks if the blob is a text file
                 self.page_names.append(blob.name[:-4])
         return self.page_names
-    
+
     # Adds data to the content bucket.
     def upload(self, filename, data):
         blob = self.content_bucket.blob(filename)
         with blob.open('wb') as f:
             f.write(data)
 
-    #It stores password inside the file which named after each username in the gcs bucket. 
-    def sign_up(self,username,password,first_name, last_name):
+    #It stores password inside the file which named after each username in the gcs bucket.
+    def sign_up(self, username, password, first_name, last_name):
         filename = username + ".txt"
-        stats = storage.Blob(bucket = self.userInfo_bucket, name = filename).exists(self.storage_client)
+        stats = storage.Blob(bucket=self.userInfo_bucket,
+                             name=filename).exists(self.storage_client)
         if stats:
-            return "Username Taken!"            
+            return "Username Taken!"
         blob = self.userInfo_bucket.blob(filename)
-        data = {"username": username, "password": password, "first_name" : first_name, "last_name" : last_name}
+        data = {
+            "username": username,
+            "password": password,
+            "first_name": first_name,
+            "last_name": last_name
+        }
         blob.upload_from_string(json.dumps(data))
 
-    
     #It checks for the username by name of the file if it exists and then proceeds to check user credential inside the file.
     #If it matches, lets the user login else does not.
-    def sign_in(self,username,password):
+    def sign_in(self, username, password):
         filename = username + ".txt"
         blob = self.userInfo_bucket.blob(filename)
-        stats = storage.Blob(bucket = self.userInfo_bucket, name = filename).exists(self.storage_client)
-        if stats: 
+        stats = storage.Blob(bucket=self.userInfo_bucket,
+                             name=filename).exists(self.storage_client)
+        if stats:
             entered_password = self.hash_password(password)
             stored_info = blob.download_as_text()
             info = json.loads(stored_info)
@@ -68,12 +76,12 @@ class Backend:
         return False
 
     #This method hashes password
-    def hash_password(self,password):
-        return hashlib.blake2b(password.encode()).hexdigest() 
+    def hash_password(self, password):
+        return hashlib.blake2b(password.encode()).hexdigest()
 
     #Input: userId
     #Returns: User Information except Password
-    def get_user_info(self,username):
+    def get_user_info(self, username):
         information = dict()
         filename = str(username) + ".txt"
         blob = self.userInfo_bucket.blob(filename)
@@ -88,5 +96,3 @@ class Backend:
         blob = self.content_bucket.get_blob(image_file)
         with blob.open('rb') as f:
             return BytesIO(f.read())
-
-
