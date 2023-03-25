@@ -12,8 +12,7 @@ unittest:
  dependencies: 
  - lint
  script:
- - cd project
  - pip install -r requirements.txt
- - pytest
+ - pytest project/
  only:
  - pushes
