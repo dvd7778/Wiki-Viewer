@@ -4,7 +4,7 @@ lint:
   - pip install yapf
   - yapf --recursive .
   only:
-  - pushes
+  - merge_requests
 
 
 unittest:
