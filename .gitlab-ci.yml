@@ -13,6 +13,6 @@ unittest:
  - lint
  script:
  - pip install -r requirements.txt
- - pytest project/
+ - pytest
  only:
  - pushes
