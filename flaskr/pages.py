@@ -117,6 +117,16 @@ def make_endpoints(app, login_manager):
                                form=form,
                                error=error)
 
+    @app.route("/profile", methods = ["GET", "POST"])
+    def profile():
+        return render_template('profile.html', title="Profile")
+
+    
+    @app.route("/search", methods = ["GET", "POST"])
+    def search():
+        return render_template('search.html', title="Search")
+
+
     # Logins the user to the Flask
     @login_manager.user_loader
     def load_user(user_id):
