@@ -11,6 +11,7 @@ from flask_wtf.csrf import generate_csrf
 def app():
     app = create_app({
         'TESTING': True,
+        'WTF_CSRF_ENABLED': False,
     })
     return app
 
@@ -56,10 +57,14 @@ def test_login_page(client):
     assert b"Login to Wiki" in resp.data
 
 # Test for login route fail.
-def test_login_fail(client):
-    resp = client.get('/login')
+@patch('flaskr.backend.Backend')
+@patch('flaskr.forms.LoginForm')
+def test_login_fail(mock_backend, mock_form, client):
+    mock_form.validate_on_submit.return_value = True
+    mock_backend.sign_in.return_value = False
+    resp = client.post('/login',data = {"email": "Barshachy@gmail.com", "password": "password"})
     assert resp.status_code == 200
-    assert b"Login to Wiki" in resp.data
+    assert b'Login Unsuccessful! Please check your username and password again!' in resp.data
 
 # Test for register route.
 def test_register_page(client):

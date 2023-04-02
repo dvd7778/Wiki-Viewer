@@ -31,3 +31,4 @@ def test_get_name(new_user):
     user = User(new_user)
     get_user = user.get_name()
     assert get_user.username == "barshachy@gmail.com.txt"
+    

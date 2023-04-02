@@ -3,13 +3,20 @@ from flask import request
 from flask_login import login_user, current_user, logout_user, login_required
 from flaskr.backend import Backend
 from flaskr.forms import RegisterForm, LoginForm
-from .forms import RegisterForm, LoginForm
+from .forms import RegisterForm, LoginForm, ResetPasswordForm, RequestResetForm
 import hashlib
-#from PIL import Image
-#import io
+import re
 from flaskr.models import User
+from flask_mail import Message
+from itsdangerous import URLSafeTimedSerializer
+from itsdangerous import URLSafeTimedSerializer as Serializer
+from flask import render_template_string
+from flask_mail import Message
 
-def make_endpoints(app, login_manager):
+from flask import render_template_string, url_for
+from flask_mail import Message
+from itsdangerous import URLSafeTimedSerializer
+def make_endpoints(app, login_manager,mail):
     b = Backend()
     # Flask uses the "app.route" decorator to call methods when users
     # go to a specific route on the project's website.
@@ -133,6 +140,142 @@ def make_endpoints(app, login_manager):
             b.upload(f.filename, f.stream.read())
             return 'file uploaded successfully'
 
-    
+    # # regular expression to check for a valid email address
+    email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    # def send_reset_email(user):
+    #     # check if user is a valid email address
+    #     if not re.match(email_regex, user):
+    #         raise ValueError('Invalid email address')
+    #     # s = Serializer(app.config['SECRET_KEY'], 1200)
+    #     # token = s.dumps({'user_id': user}).decode('utf-8')
+    #     s = URLSafeTimedSerializer('dev')
+    #     token = s.dumps({'user': user}, salt='password-reset')
+    #     print("TOKEN FOR S", token)
+    #     msg = Message('Password Reset Request', sender='noreply@demo.com', recipients=[user])
+    #     msg.body = f'''To reset your password visit the following link: 
+    #         {url_for('reset_token', token=token, _external=True)}
 
+    #         If you did not send the request to change your password, simply ignore this email.
+    #         '''
+    #     mail.send(msg)
+
+    def send_reset_email(user):
+        # check if user is a valid email address
+        email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+
+        if not re.match(email_regex, user):
+            raise ValueError('Invalid email address')
+
+        s = URLSafeTimedSerializer(app.config['SECRET_KEY'], salt='reset-password')
+        token = s.dumps({'user': user})
+        print("TOKEN FOR S", token)
+        msg = Message('Password Reset Request', sender='noreply@demo.com', recipients=[user])
+        msg.body = f'''To reset your password visit the following link: 
+            {url_for('reset_token', token=token, _external=True)}
+
+            If you did not send the request to change your password, simply ignore this email.
+            '''
+        mail.send(msg)
+
+    @app.route('/reset_password',methods = ['POST', 'GET'])
+    def reset_request():
+        if current_user.is_authenticated:
+            return redirect(url_for('home'))
+        error = None
+        form = RequestResetForm()
+        if form.validate_on_submit() and request.method == "POST":
+            user = form.email.data.lower()
+            check_if_correct = b.check_if_registered(user)
+            if check_if_correct:
+                send_reset_email(user)
+                flash('Password reset link sent to your email!')
+                return redirect(url_for('login'))
+            # else:
+            #     error = 'Your email is not registered'
+            #     return render_template('reset_request.html',title = 'Reset Password', form = form, error = error )      
+        return render_template('reset_request.html',title = 'Reset Password',form = form)
     
+   
+
+    # @app.route('/reset_password/<token>', methods=['GET', 'POST'])
+    # def reset_token(token):
+    #     # # Verify the token
+    #     s = URLSafeTimedSerializer('dev')
+    #     # try:
+    #     data = s.loads(token, salt='reset-password', max_age=86400)
+    #     print("DATA CHECK FOR token", data)
+    #     # except:
+    #     #     flash('The password reset link is invalid or has expired.')
+    #     #     return redirect(url_for('reset_request'))
+    #     # print("DATA ABOUT USER",data)
+    #     # # Check if the user is logged in
+    #     # if current_user.is_authenticated:
+    #     #     return redirect(url_for('home'))
+
+    #     # Get the user from the token
+    #     username = data['username']
+    #     user = User(username)
+
+    #     # # If the user does not exist, redirect to the forgot password page
+    #     # if_exists = b.check_if_registered(user)
+    #     # print("USER INFO", user)
+    #     # print("IFFFFFFFFFFFF EXISTSSSSSS", if_exists)
+
+    #     # if not if_exists:
+    #     #     flash('The password reset link is invalid or has expired.')
+    #     #     return redirect(url_for('reset_request'))
+
+    #     # # Initialize the reset password form
+    #     form = ResetPasswordForm()
+
+    #     # Handle form submission
+    #     if form.validate_on_submit():
+    #         password = form.password.data
+    #         check_if_reset = b.reset_password(username,password)
+    #         if check_if_reset:
+    #             # Send confirmation email
+    #             msg = Message('Your password has been reset', sender=app.config['MAIL_DEFAULT_SENDER'], recipients=[user.email])
+    #             msg.body = f'''Your password for the {app.config['APP_NAME']} has been reset successfully.'''
+    #             mail.send(msg)
+
+    #             # Redirect to the login page
+    #             flash('Your password has been reset successfully. You can now log in.', 'success')
+    #             return redirect(url_for('login'))
+    #         else:
+    #             flash('Password Reset Fails')
+
+    #     return render_template('reset_token.html', title='Reset Password', form=form)
+
+    @app.route('/reset_password/<token>', methods=['GET', 'POST'])
+    def reset_token(token):
+        # Verify the token
+        s = URLSafeTimedSerializer(app.config['SECRET_KEY'], salt='reset-password')
+        try:
+            data = s.loads(token, max_age=86400)
+        except:
+            flash('The password reset link is invalid or has expired.')
+            return redirect(url_for('reset_request'))
+
+        # Get the user from the token        
+        user = data['user']
+        # Initialize the reset password form
+        form = ResetPasswordForm()
+        print("Forms on submit",form.validate_on_submit())
+        # Handle form submission
+        if form.validate_on_submit() and request.method == 'POST':
+            password = form.password.data
+            print("actual password",password)
+            check_if_reset = b.reset_password(user, password)
+            print("Check if password correct", check_if_reset)
+            if check_if_reset:
+                # Redirect to the login page
+                flash('Your password has been reset successfully. You can now log in.', 'success')
+                return redirect(url_for('login'))
+                # Send confirmation email
+                msg = Message('Your password has been reset', sender='noreply@demo.com', recipients=[user])
+                msg.body = f'''Your password for the WikiViewer has been reset successfully.'''
+                mail.send(msg)
+                
+            else:
+                flash('Password Reset Fails')
+        return render_template('reset_token.html', title='Reset Password', form=form)

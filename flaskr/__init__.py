@@ -1,8 +1,9 @@
 from flaskr import pages
-
+from flask_mail import Mail
 from flask import Flask
 from flask_login import LoginManager
 import logging
+import os
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -18,7 +19,13 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY='dev',
     )
-
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 465
+    # app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USE_TLS'] = False
+    app.config['MAIL_USE_SSL'] = True
+    app.config['MAIL_USERNAME'] = 'barsha.chaudhary@bison.howard.edu'
+    app.config['MAIL_PASSWORD'] = 'meqlzeaggmlydozu'
 
     if test_config is None:
         # Load the instance config, if it exists, when not testing.
@@ -33,5 +40,6 @@ def create_app(test_config=None):
     
     login_manager = LoginManager()
     login_manager.init_app(app)
-    pages.make_endpoints(app, login_manager)    
+    mail = Mail(app)
+    pages.make_endpoints(app, login_manager, mail)    
     return app
