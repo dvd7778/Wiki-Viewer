@@ -15,7 +15,7 @@ unittest:
  - pip install -r requirements.txt
  - pytest
  only:
- - pushes
+ - merge_requests
 
 
 prod:
