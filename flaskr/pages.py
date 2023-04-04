@@ -5,9 +5,9 @@ from flaskr.backend import Backend
 from flaskr.forms import RegisterForm, LoginForm
 from .forms import RegisterForm, LoginForm
 import hashlib
-#from PIL import Image
-#import io
 from flaskr.models import User
+from tkinter import tk
+
 
 
 def make_endpoints(app, login_manager):
@@ -124,6 +124,10 @@ def make_endpoints(app, login_manager):
     
     @app.route("/search", methods = ["GET", "POST"])
     def search():
+        # Do stuff here for the data
+        if request.method == "POST":
+            selection = tk.StringVar()
+            print(selection)
         return render_template('search.html', title="Search")
 
 

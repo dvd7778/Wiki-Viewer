@@ -2,8 +2,9 @@
 from google.cloud import storage
 import hashlib
 from io import BytesIO
-from flaskr import pages
+#from flaskr import pages uncomment this
 import json
+import difflib
 
 
 # Class for backend objects.
@@ -96,3 +97,20 @@ class Backend:
         blob = self.content_bucket.get_blob(image_file)
         with blob.open('rb') as f:
             return BytesIO(f.read())
+
+    def title_search(self, query):
+        b = Backend()
+        shows = b.get_all_page_names()
+        matches = difflib.get_close_matches(query, shows, n=5, cutoff=0.5)
+        if not matches:
+            return "No matches found for " + "'" + query + "'"
+        return matches
+
+
+
+
+
+    def genre_search(self, query):
+        pass
+b = Backend()
+print(b.title_search("Squid"))
