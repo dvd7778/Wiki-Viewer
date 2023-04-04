@@ -6,7 +6,7 @@ from flaskr.forms import RegisterForm, LoginForm
 from .forms import RegisterForm, LoginForm
 import hashlib
 from flaskr.models import User
-from tkinter import tk
+import tkinter as tk
 
 
 
