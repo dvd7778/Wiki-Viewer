@@ -3,7 +3,6 @@ from flask import request
 from flask_login import login_user, current_user, logout_user, login_required
 from flaskr.backend import Backend
 from flaskr.forms import RegisterForm, LoginForm
-from .forms import RegisterForm, LoginForm
 import hashlib
 #from PIL import Image
 #import io
