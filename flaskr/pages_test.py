@@ -37,6 +37,8 @@ def test_upload_page(client):
     resp = client.get('/upload')
     assert resp.status_code == 200
     assert b"Upload File to the Wiki" in resp.data
+    #Test for the feature1-adding genre clickable button
+    assert b"Select at least one genre the show belong to:" in resp.data
 
 
 # Tests the pages page renders correctly and the list of the uploaded pages

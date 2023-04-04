@@ -31,5 +31,5 @@ def create_app(test_config=None):
 
     login_manager = LoginManager()
     login_manager.init_app(app)
-    pages.make_endpoints(app, login_manager)
+    pages.make_endpoints(app, login_manager)    
     return app
