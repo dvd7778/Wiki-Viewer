@@ -1,11 +1,12 @@
 from flaskr import create_app
 from unittest.mock import MagicMock
 from unittest.mock import patch
-from flask import request,render_template, redirect,url_for, flash,session
+from flask import request, render_template, redirect, url_for, flash, session
 import pytest
 from flask_wtf.csrf import generate_csrf
 
-# See https://flask.palletsprojects.com/en/2.2.x/testing/ 
+
+# See https://flask.palletsprojects.com/en/2.2.x/testing/
 # for more info on testing
 @pytest.fixture
 def app():
@@ -14,18 +15,22 @@ def app():
     })
     return app
 
+
 @pytest.fixture
 def client(app):
     return app.test_client()
 
+
 # TODO(Checkpoint (groups of 4 only) Requirement 4): Change test to
 # match the changes made in the other Checkpoint Requirements.
+
 
 # Test for home route.
 def test_home_page(client):
     resp = client.get("/")
     assert resp.status_code == 200
     assert b"Welcome to the NetflixSeries Wiki!" in resp.data
+
 
 # Test for upload route.
 def test_upload_page(client):
@@ -35,9 +40,11 @@ def test_upload_page(client):
     #Test for the feature1-adding genre clickable button
     assert b"Select at least one genre the show belong to:" in resp.data
 
+
 # Tests the pages page renders correctly and the list of the uploaded pages
 def test_pages_page(client):
-    with patch('flaskr.backend.Backend.get_all_page_names') as get_all_page_names:
+    with patch(
+            'flaskr.backend.Backend.get_all_page_names') as get_all_page_names:
         get_all_page_names.return_value = ["test", "hello"]
         resp = client.get('/pages')
         assert resp.status_code == 200
@@ -45,11 +52,13 @@ def test_pages_page(client):
         assert b"test" in resp.data
         assert b"hello" in resp.data
 
+
 # Tests that the about page renders correctly
 def test_about_page(client):
     resp = client.get('/about')
     assert resp.status_code == 200
     assert b"About this Wiki" in resp.data
+
 
 # Test for login route.
 def test_login_page(client):
@@ -57,25 +66,29 @@ def test_login_page(client):
     assert resp.status_code == 200
     assert b"Login to Wiki" in resp.data
 
+
 # Test for login route fail.
 def test_login_fail(client):
     resp = client.get('/login')
     assert resp.status_code == 200
     assert b"Login to Wiki" in resp.data
 
+
 # Test for register route.
 def test_register_page(client):
-    resp = client.get('/register')    
+    resp = client.get('/register')
     assert resp.status_code == 200
     assert b"Sign up to NetflixSeries Wiki" in resp.data
     assert b"Have Netflix Account?:" in resp.data
-    
+
+
 # Tests that the parametrized pages renders a "Page not found." message when the page is not in the content bucket
 def test_parametrized_pages_fail(client):
     filename = "TestFile"
     resp = client.get(f'/pages/{filename}')
     assert resp.status_code == 200
     assert b'Page not found.' in resp.data
+
 
 # Tests that the parametrized pages renders a page with the parameter file's content
 def test_parametrized_pages_working(client):
@@ -91,7 +104,8 @@ def test_parametrized_pages_working(client):
         assert b'a' in resp.data
         assert b'test' in resp.data
 
-#testing pages for login success     
+
+#testing pages for login success
 def test_login_success(client):
     response = client.post('/login', follow_redirects=True)
     assert response.status_code == 200
