@@ -29,7 +29,7 @@ def client(app):
 def test_home_page(client):
     resp = client.get("/")
     assert resp.status_code == 200
-    assert b"Welcome to the NetflixSeries Wiki!" in resp.data
+    assert b"Welcome to the NetflixSeries Wik!" in resp.data
 
 
 # Test for upload route.
