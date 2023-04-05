@@ -13,6 +13,7 @@ class Backend:
         self.storage_client = storage_client
         self.content_bucket = storage_client.bucket('wiki_content')
         self.userInfo_bucket = storage_client.bucket('users-passwords')
+        self.genres_bucket = storage_client.bucket('show-genres')
         self.page_names = []
 
     # Gets an uploaded page from the content bucket.
@@ -38,10 +39,18 @@ class Backend:
         return self.page_names
 
     # Adds data to the content bucket.
-    def upload(self, filename, data):
-        blob = self.content_bucket.blob(filename)
-        with blob.open('wb') as f:
+    def upload(self, filename, data, genres):
+        content_blob = self.content_bucket.blob(filename)
+        with content_blob.open('wb') as f:
             f.write(data)
+        for genre in genres:
+            genre_blob = self.genres_bucket.get_blob(genre + ".txt")
+            with genre_blob.open() as file:
+                text = file.readlines()
+                text.append(filename[:-4] + "\n")
+            with genre_blob.open('w') as file:
+                for i in range(len(text)):
+                    file.write(text[i])
 
     #It stores password inside the file which named after each username in the gcs bucket.
     def sign_up(self, username, password, first_name, last_name):

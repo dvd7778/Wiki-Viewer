@@ -147,14 +147,33 @@ def make_endpoints(app, login_manager):
     # Returns html for upload
     @app.route('/upload', methods=['GET'])
     def upload_page():
-        return render_template('upload.html')
+        return render_template('upload.html', error=None)
 
     # Route for uploading files to the GCS bucket
     @app.route('/upload', methods=['POST'])
     def upload_file():
         if request.method == 'POST':
+            checkbox_names = ['genre_act', 'genre_adv', 'genre_anim', 'genre_com', 'genre_fant', 'genre_rom', 'genre_hor', 'genre_thr', 'genre_scifi', 'genre_drama']
+            checked_genres = []
+            for genre in checkbox_names:
+                checked = request.form.get(genre)
+                if checked:
+                    checked_genres.append(checked)
+
+            # action = request.form.get('genre_act')
+            # adventure = request.form.get('genre_adv')
+            # animation = request.form.get('genre_anim')
+            # comedy = request.form.get('genre_com')
+            # fantasy = request.form.get('genre_fant')
+            # romance = request.form.get('genre_rom')
+            # horror = request.form.get('genre_hor')
+            # thriller = request.form.get('genre_thr')
+            # scifi = request.form.get('genre_scifi')
+
+            if not checked_genres:
+                return render_template('upload.html', error="No genres were selected. Please select at least one genre.")
             f = request.files['file']
-            b.upload(f.filename, f.stream.read())
+            b.upload(f.filename, f.stream.read(), checked_genres)
             return 'file uploaded successfully'
     
     
