@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}About{% endblock %}
+{% block content %}
+
+<h1> Customize Your Profile Here </h1>
+
+<div>
+    Upload Profile Picture
+</div>
+<br></br>
+<form action = "/upload" method = "POST" 
+         enctype = "multipart/form-data">
+         <input type = "file" name = "file" />
+         <input type = "submit"/>
+      </form>  
+
+
+{%endblock%}
