@@ -7,31 +7,24 @@
 </head>
 
 <body style="text-align: center">
-    
-    <ul class="nav">
-        <li><a href="/home">Home</a></li>
-        <li><a href="/pages">Pages</a></li>
-        <li><a href="/about">About</a></li>
+      <div class="nav-bar">
+        <a href="/home">Home </a>
+        <a href="/pages">Pages</a>
+        <a href="/about">About</a>
         {% if not current_user.is_authenticated %}
-        <li><a href="/login">Login</a></li>
-        <li><a href="/register">Register</a></li>
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
         {% endif %}
-
         {% if current_user.is_authenticated %}
-        Welcome {{ current_user.name }}!
-       
-        
-        <li><a href="/upload">Upload</a></li>
-        <li><a href="/logout">Logout</a></li>
+        <a href="/upload">Upload</a>
+        <a href="/logout">Logout</a>
         {% endif %}
-      </ul>
-
+      </div>
+      <h3>
+        {% if current_user.is_authenticated %}
+         Welcome {{ current_user.name }}!
+        {% endif %}
+      </h3>
       <div id="content">{% block content %}{% endblock %}</div>
-    <!-- <h1> Hi, {{data}} </h1>
-    <div style="background-color:powderblue;">
-        <div>       
-            Here you will find the best TV shows on Netflix, ranked and with a synopsis of each show.
-        </div>
-    </div> -->
 </body>
 </html>
