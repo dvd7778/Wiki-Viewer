@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block title %}Upload{% endblock %}
+{% block content %}       
+    <h3>Reset your Password</h3>
+    <subtitle> <b>If your email is registerd, you will get an email reset link.</b></subtitle>
+    {% if error %}
+        <p> <strong> Error </strong> : {{error}} </p>
+    {% endif %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <p>{{message}}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <form action= "" method= "POST" enctype="multipart/form-data"><br>
+        {{ form.csrf_token }}
+        {{ form.hidden_tag() }}
+        <label> Email: </label>
+        <input type="text" placeholder= "Email" name="email" required value = {{request.form.email}}><br><br>
+        <input type = "submit" name= "submit_to_reset" value = "Password Reset">
+    </form>
+{% endblock%}

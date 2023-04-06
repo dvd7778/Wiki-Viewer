@@ -18,14 +18,14 @@
             {{ form.csrf_token }}
             {{ form.hidden_tag() }}
             <label> First name:</label>
-            <input type="text" name="first_name" value="{{ request.form.first_name }}">
+            <input type="text" placeholder = "First Name" name="first_name" value="{{ request.form.first_name }}">
             <label> Last name:</label>
-            <input type="text" name="last_name" value="{{ request.form.last_name }}">
+            <input type="text" placeholder = "Last Name" name="last_name" value="{{ request.form.last_name }}">
             <br><br>
             <label>Your Email:</label>
-            <input type="email" name="email" value="{{ request.form.email }}">
+            <input type="email" placeholder = "Email" name="email" value="{{ request.form.email }}">
             <label>Password:</label>
-            <input type="password" name="password" value="{{ request.form.password }}">
+            <input type="password" placeholder = "Password" name="password" value="{{ request.form.password }}">
             <br>
             <label>Have Netflix Account?:</label>
             <input type="radio" name="account_option" value="Yes"> Yes

@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block title %}Upload{% endblock %}
+{% block content %}       
+    <h3>Reset Your Password</h3>
+    {% if error %}
+        <p> <strong> Error </strong> : {{error}} </p>
+    {% endif %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <p>{{message}}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <form action= "" method= "POST" enctype="multipart/form-data"><br>
+        {{ form.csrf_token }}
+        {{ form.hidden_tag() }}
+        <label> Password: </label>
+        <input type= "password" name="password" required value={{request.form.password}}>
+        <label> Confirm Password: </label>
+        <input type= "password" name="confirm_password" required value={{request.form.confirm_password}}>
+        <input type = "submit" name= "submit_to_reset" value = "Password Reset">
+    </form>
+{% endblock%}
