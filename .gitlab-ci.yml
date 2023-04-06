@@ -1,0 +1,32 @@
+lint:
+  stage: build
+  script:
+  - pip install yapf
+  - yapf --recursive .
+  only:
+  - merge_requests
+
+
+unittest:
+ stage: test
+ dependencies: 
+ - lint
+ script:
+ - pip install -r requirements.txt
+ - pytest
+ only:
+ - merge_requests
+
+
+prod:
+ image: google/cloud-sdk:alpine
+ stage: deploy
+ dependencies:
+ - unittest
+ environment: Production
+ only:
+ - main
+ script:
+ - echo $SERVICE_ACCOUNT > /tmp/$CI_PIPELINE_ID.json
+ - gcloud auth activate-service-account --key-file /tmp/$CI_PIPELINE_ID.json
+ - gcloud --quiet --project $PROJECT_ID app deploy
