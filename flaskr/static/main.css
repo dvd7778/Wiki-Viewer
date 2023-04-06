@@ -5,3 +5,7 @@
     display: inline-block;
   }
 .nav li{   display: inline-block;}
+
+a {
+    color: rgb(32, 34, 163)
+}

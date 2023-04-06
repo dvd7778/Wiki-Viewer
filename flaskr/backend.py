@@ -90,6 +90,7 @@ class Backend:
         blob = self.content_bucket.get_blob(image_file)
         with blob.open('rb') as f:
             return BytesIO(f.read())
+
     #check if user is registered
     def check_if_registered(self,user):
         filename = user + ".txt"
@@ -97,9 +98,9 @@ class Backend:
         if stats:
             return True
         else:
-            False
+            return False
             
-    #reset password
+    #reset password for the user through forget password feature
     def reset_password(self,username,password):
         filename = username + ".txt"
         blob = self.userInfo_bucket.blob(filename)
