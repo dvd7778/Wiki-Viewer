@@ -16,8 +16,6 @@ from flask import render_template_string, url_for
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer
 def make_endpoints(app, login_manager,mail):
-
-def make_endpoints(app, login_manager):
     b = Backend()
     # Flask uses the "app.route" decorator to call methods when users
     # go to a specific route on the project's website.
