@@ -156,5 +156,3 @@ def make_endpoints(app, login_manager):
             f = request.files['file']
             b.upload(f.filename, f.stream.read())
             return 'file uploaded successfully'
-    
-    
