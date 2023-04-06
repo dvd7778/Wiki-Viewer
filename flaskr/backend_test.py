@@ -229,4 +229,41 @@ def test_check_if_registered(storage_client,blob,bucket,user_name):
         output = b.check_if_registered(user_name)
         assert output == False
 
+@pytest.fixture
+def new_password(user_info):
+    user_info["password"] = "new_password"
+    return user_info["password"]
 
+@pytest.fixture
+def new_user_info(storage_client, user_info, new_password):
+    b = Backend(storage_client)
+    user_info["password"] = "new_password"
+    password = b.hash_password(new_password)
+    user_info["password"] = password
+    return user_info
+
+@pytest.fixture
+def new_user_info_json_loads(new_user_info):
+    updated_stored_info = json.dumps(new_user_info)
+    return updated_stored_info
+
+#testing the user password change function
+def test_reset_password_success(storage_client,blob,bucket,user_name,new_password,new_user_info_json_loads,new_user_info):
+    with patch('google.cloud.storage.Blob') as storage_blob:
+        storage_blob.return_value.exists.return_value = True
+        blob.download_as_text.return_value = new_user_info_json_loads
+        b = Backend(storage_client)
+        b.reset_password(user_name,new_password)
+        bucket.blob.assert_called_with(user_name + ".txt")
+        blob.upload_from_string.assert_called_with(json.dumps(new_user_info))
+
+#testing for password fail
+def test_reset_password_fail(storage_client,blob,bucket,user_name,new_password, user_info,user_info_json_loads):
+    with patch('google.cloud.storage.Blob') as storage_blob:
+        storage_blob.return_value.exists.return_value = False
+        blob.download_as_text.return_value = user_info_json_loads
+        b = Backend(storage_client)
+        check_reset = b.reset_password(user_name,new_password)
+        bucket.blob.assert_called_with(user_name + ".txt")
+        assert check_reset == False
+        

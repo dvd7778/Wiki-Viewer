@@ -174,7 +174,6 @@ def make_endpoints(app, login_manager,mail):
 
         s = URLSafeTimedSerializer(app.config['SECRET_KEY'], salt='reset-password')
         token = s.dumps({'user': user})
-        print("TOKEN FOR S", token)
         msg = Message('Password Reset Request', sender='noreply@demo.com', recipients=[user])
         msg.body = f'''To reset your password visit the following link: 
             {url_for('reset_token', token=token, _external=True)}
@@ -215,13 +214,10 @@ def make_endpoints(app, login_manager,mail):
         user = data['user']
         # Initialize the reset password form
         form = ResetPasswordForm()
-        print("Forms on submit",form.validate_on_submit())
         # Handle form submission
         if form.validate_on_submit() and request.method == 'POST':
             password = form.password.data
-            print("actual password",password)
             check_if_reset = b.reset_password(user, password)
-            print("Check if password correct", check_if_reset)
             if check_if_reset:
                 # Redirect to the login page
                 flash('Your password has been reset successfully. You can now log in.', 'success')
