@@ -38,7 +38,7 @@ class Backend:
                 self.page_names.append(blob.name[:-4])
         return self.page_names
 
-    # Adds data to the content bucket.
+    # Adds data to the content bucket, and uploads the selected genres to the genre bucket.
     def upload(self, filename, data, genres):
         content_blob = self.content_bucket.blob(filename)
         with content_blob.open('wb') as f:
