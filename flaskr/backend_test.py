@@ -213,6 +213,7 @@ def test_get_user_info(storage_client, blob, bucket, user_name, user_password,
     assert json_output["first_name"] == output["Firstname"]
     assert json_output["last_name"] == output["Secondname"]
     assert output == {"Firstname": "Barsha", "Secondname": "Chaudhary"}
+    
 
 
 # Test for a successful backend title_search method.
@@ -310,3 +311,21 @@ def test_genre_search_fail3(file_stream, blob, bucket, storage_client):
     blob.open.assert_called_once()
     file_stream.readlines.assert_called_once()
     assert text == "No shows for 'Romance' yet"
+   
+
+#testing if the function is checking if the user is registered or not
+def test_check_if_registered(storage_client,blob,bucket,user_name):
+    with patch('google.cloud.storage.Blob') as storage_blob:
+        #case when user is registered
+        storage_blob.return_value.exists.return_value = True
+        b = Backend(storage_client)
+        output = b.check_if_registered(user_name)
+        assert output == True
+
+        #case when user is not registered
+        storage_blob.return_value.exists.return_value = False
+        b = Backend(storage_client)
+        output = b.check_if_registered(user_name)
+        assert output == False
+
+

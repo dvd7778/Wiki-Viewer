@@ -1,15 +1,47 @@
 {% extends "layout.html" %}
 {% block title %}Upload{% endblock %}
-{% block content %}
-
-
-    
+{% block content %} 
     <h1>Upload Shows to the Wiki</h1>
-   
+    <style>
+        .checkbox-round {
+            width: 1.8em;
+            height: 1.8em;
+            background-color: white;
+            border-radius: 50%;
+            vertical-align: middle;
+            border: 1px solid #ddd;
+            appearance: none;
+            -webkit-appearance: none;
+            outline: none;
+            cursor: pointer;
+        }
+
+.checkbox-round:checked {
+    background-color: rgba(57, 90, 183, 0.73);
+}
+    </style>
       <form action = "/upload" method = "POST" 
          enctype = "multipart/form-data">
          <input type = "file" name = "file" required />
-         <input type = "submit"/>
+         <input type = "submit"/><br><br>
+         <subtitle><b> Select at least one genre the show belong to:</b></subtitle><br><br>
+         <input type="checkbox" class = "checkbox-round" name="genre_adv" value="Adventure">
+         <label for="genre_adv"> Adventure</label><br>
+         <input type="checkbox" class = "checkbox-round" name="genre_act" value="Action">
+         <label for="genre_adv"> Action</label><br>
+         <input type="checkbox" class = "checkbox-round" name="genre_anim" value="Animation">
+         <label for="genre_adv"> Animation</label><br>
+         <input type="checkbox" class = "checkbox-round" name="genre_som" value="Comedy">
+         <label for="genre_adv"> Comedy</label><br>
+         <input type="checkbox" class = "checkbox-round" name="genre_drama" value="Drama">
+         <label for="genre_adv"> Drama</label><br>
+         <input type="checkbox" class = "checkbox-round" name="genre_fant" value="Fantasy">
+         <label for="genre_adv"> Fantasy</label><br>
+         <input type="checkbox" class = "checkbox-round" name="genre_rom" value="Romance">
+         <label for="genre_adv"> Romance </label><br>
+         <input type="checkbox" class = "checkbox-round" name="genre_scifi" value="Science Fiction">
+         <label for="genre_adv"> Science Fiction</label><br>
+         <input type="checkbox" class = "checkbox-round" name="genre_thr" value="Thriller">
+         <label for="genre_adv"> Thriller</label><br>
       </form>   
-  
 {%endblock%}

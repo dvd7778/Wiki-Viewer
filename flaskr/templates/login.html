@@ -16,10 +16,11 @@
         {{ form.csrf_token }}
         {{ form.hidden_tag() }}
         <label> Email </label>
-        <input type="text" name="email" value={{request.form.email}}>
+        <input type="text" placeholder="Email" name="email" value={{request.form.email}}>
         <label> Password </label>
-        <input type= "password" name="password" value={{request.form.password}}>
-        <input type = "submit" name= "submit_to_signup" value = "Login">
+        <input type= "password" placeholder="Password" name="password" value={{request.form.password}}>
+        <input type = "submit" name= "submit_to_signup" value = "Login"><br>
+        <subtitle><a href="/reset_password"><b>Forgot Password?</b></a></subtitle> 
     </form>
     {% if request.method == 'POST' and not error %}
         <p class="message">You have successfully logged in!</p>
