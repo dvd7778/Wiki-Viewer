@@ -36,7 +36,7 @@ def test_home_page(client):
 def test_upload_page(client):
     resp = client.get('/upload')
     assert resp.status_code == 200
-    assert b"Upload File to the Wiki" in resp.data
+    assert b"Upload Shows to the Wiki" in resp.data
 
 
 # Tests the pages page renders correctly and the list of the uploaded pages
@@ -108,3 +108,17 @@ def test_login_success(client):
     response = client.post('/login', follow_redirects=True)
     assert response.status_code == 200
     assert b'<p class="message">You have successfully logged in!</p>' in response.data
+
+
+# Tests the profile route.
+def test_profile_page(client):
+    resp = client.get('/profile')
+    assert resp.status_code == 200
+    assert b"Customize Your Profile Here" in resp.data
+
+
+# Tests the search route.
+def test_search_page(client):
+    resp = client.get('/search')
+    assert resp.status_code == 200
+    assert b"Search For Netflix Shows" in resp.data

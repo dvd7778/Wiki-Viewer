@@ -10,18 +10,25 @@
   <body>
   
     <div class="search-container">
-      <form action="/action_page.php">
-        <input type="text" placeholder="Search.." name="search">
+      <form action= "" method="POST">
+        <input type="text" placeholder="Search.." name="search" required>
         <button type="submit">Submit</button>
+        <br>
+        <p>Please select to Search by Title or Genre(s):</p>
+        <input type="radio" id="search" name="choice" value="Title" checked>
+        <label for="genre">Title</label><br>
+        <input type="radio" id="search" name="choice" value="Genre">
+        <label for="genre">Genre(s)</label><br>
+  <br>
       </form>
     </div>
   </div>
-  <p>Please select to Search by Title or Genre(s):</p>
-  <input type="radio" id="search" name="choice" value="Title" checked>
+  <!-- <p>Please select to Search by Title or Genre(s):</p> -->
+  <!-- <input type="radio" id="search" name="choice" value="Title" checked>
   <label for="genre">Title</label><br>
   <input type="radio" id="search" name="choice" value="Genre">
   <label for="genre">Genre(s)</label><br>
-  <br>
+  <br> -->
   <div>
     If genre(s), please search from the following: <br>
     Adventure <br>
@@ -32,7 +39,9 @@
     Drama<br>
     Romance<br>
     Science Fiction<br>
-    Fantasy
+    Fantasy <br>
+    <br>
+    For multiple genres, separate by commas (i.e., "Adventure, Action") 
 
 </div>
 

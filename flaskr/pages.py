@@ -6,8 +6,6 @@ from flaskr.forms import RegisterForm, LoginForm
 from .forms import RegisterForm, LoginForm
 import hashlib
 from flaskr.models import User
-import tkinter as tk
-
 
 
 def make_endpoints(app, login_manager):
@@ -117,19 +115,32 @@ def make_endpoints(app, login_manager):
                                form=form,
                                error=error)
 
-    @app.route("/profile", methods = ["GET", "POST"])
+    @app.route("/profile", methods=["GET", "POST"])
     def profile():
         return render_template('profile.html', title="Profile")
 
-    
-    @app.route("/search", methods = ["GET", "POST"])
+    @app.route("/search", methods=["GET", "POST"])
     def search():
         # Do stuff here for the data
         if request.method == "POST":
-            selection = tk.StringVar()
-            print(selection)
-        return render_template('search.html', title="Search")
+            radio = request.form["choice"]
+            query = request.form["search"]
+            if radio == "Title":
+                title_matches = b.title_search(query)
 
+            elif radio == "Genre":
+                title_matches = b.genre_search(query)
+
+            return render_template('search_results.html',
+                                   title="Search",
+                                   results=title_matches)
+
+            # print("Selected choice is" ,button1)
+            # print("Query was", query)
+            return render_template('search.html', title="Search")
+
+        else:
+            return render_template('search.html', title="Search")
 
     # Logins the user to the Flask
     @login_manager.user_loader

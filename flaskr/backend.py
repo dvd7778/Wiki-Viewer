@@ -5,6 +5,7 @@ from io import BytesIO
 #from flaskr import pages uncomment this
 import json
 import difflib
+import os
 
 
 # Class for backend objects.
@@ -14,6 +15,7 @@ class Backend:
         self.storage_client = storage_client
         self.content_bucket = storage_client.bucket('wiki_content')
         self.userInfo_bucket = storage_client.bucket('users-passwords')
+        self.show_genre_bucket = storage_client.bucket('show-genres')
         self.page_names = []
 
     # Gets an uploaded page from the content bucket.
@@ -98,19 +100,47 @@ class Backend:
         with blob.open('rb') as f:
             return BytesIO(f.read())
 
-    def title_search(self, query):
-        b = Backend()
-        shows = b.get_all_page_names()
-        matches = difflib.get_close_matches(query, shows, n=5, cutoff=0.5)
+    # Gets the corresponding titles from a title search.
+    def title_search(self, query):  
+        shows = self.get_all_page_names()
+        matches = difflib.get_close_matches(str(query), shows, n=5, cutoff=0.5)
         if not matches:
-            return "No matches found for " + "'" + query + "'"
+            return "No title matches found for " + "'" + str(query) + "'"
+        return matches
+
+    # Gets the corresponding titles from a genre search.
+    def genre_search(self, query):  
+        if type(query) != type(''):
+            return 'No genre matches found for ' + "'" + str(query) + "'"
+        matches = set()
+        queries = query.split(',')
+        genres = [
+            'action', 'adventure', 'animation', 'thriller', 'comedy', 'drama',
+            'romance', 'science fiction', 'fantasy'
+        ]
+        bad_queries = []
+        for genre in queries:
+            if genre.strip().lower() not in genres:
+                bad_queries.append(genre)
+        if len(bad_queries) == len(queries):
+            return 'No genre matches found for ' + "'" + query + "'"
+        for query in queries:
+            if query in bad_queries:
+                queries.remove(query)
+        for genre in queries:
+            blob = self.show_genre_bucket.blob(genre.strip().capitalize() +
+                                               '.txt')
+            f = blob.open()
+            content = f.readlines()
+            for show in content:
+                matches.add(show.strip())
+        if not matches:
+            return 'No shows for ' + "'" + query + "'" + ' yet'
         return matches
 
 
-
-
-
-    def genre_search(self, query):
-        pass
 b = Backend()
-print(b.title_search("Squid"))
+print(b.genre_search('Romance'))
+# print(b.genre_search('Action'))
+# print(b.genre_search('Fantasy'))
+#print(b.title_search('Squid'))

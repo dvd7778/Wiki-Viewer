@@ -1,5 +1,5 @@
 from flaskr.backend import Backend
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, call
 import unittest
 import json
 import pytest
@@ -213,3 +213,100 @@ def test_get_user_info(storage_client, blob, bucket, user_name, user_password,
     assert json_output["first_name"] == output["Firstname"]
     assert json_output["last_name"] == output["Secondname"]
     assert output == {"Firstname": "Barsha", "Secondname": "Chaudhary"}
+
+
+# Test for a successful backend title_search method.
+def test_title_search_success(file_stream, blob, bucket, storage_client):
+    blob.name = "test_blob.txt"
+    b = Backend(storage_client)
+    res = b.title_search('test')
+    assert res == ['test_blob']
+
+
+# Test for a backend title_search method failure.
+def test_title_search_fail(file_stream, blob, bucket, storage_client):
+    blob.name = "test_blob.txt"
+    b = Backend(storage_client)
+    shows = b.get_all_page_names()
+    bucket.list_blobs.assert_called_once()
+    assert "test_blob" in shows
+    res = b.title_search('fail')
+    assert res == "No title matches found for 'fail'"
+
+
+# Test for a successful backend genre_search method.
+def test_genre_search_success(file_stream, blob, bucket, storage_client):
+    file_stream.readlines.return_value = [
+        'Arcane', 'Castlevania', 'Cyberpunk Edgerunners', 'Squid Game'
+    ]
+    blob.open.return_value = file_stream
+    b = Backend(storage_client)
+    b.get_all_page_names()
+    text = b.genre_search('Action')
+    bucket.blob.assert_called_with('Action.txt')
+    blob.open.assert_called_once()
+    file_stream.readlines.assert_called_once()
+    assert text == {
+        'Squid Game', 'Arcane', 'Castlevania', 'Cyberpunk Edgerunners'
+    }
+
+
+# Test for multiple genres using backend genre_search method.
+def test_multiple_genre_search_success(file_stream, blob, bucket,
+                                       storage_client):
+    file_stream.readlines.return_value = [
+        'Arcane', 'Castlevania', 'Cyberpunk Edgerunners', 'Squid Game'
+    ]
+    blob.open.return_value = file_stream
+    b = Backend(storage_client)
+    text = b.genre_search('Action, Adventure')
+    expected_calls = [
+        call('Action.txt'),
+        call().open(),
+        call().open().__enter__().readlines(),
+        call('Adventure.txt'),
+        call().open(),
+        call().open().__enter__().readlines()
+    ]
+    bucket.blob.assert_has_calls(expected_calls)
+    assert text == {
+        'Squid Game', 'Arcane', 'Castlevania', 'Cyberpunk Edgerunners'
+    }
+
+
+# Test for wrong input type for backend genre_search method.
+def test_genre_search_fail1(file_stream, blob, bucket, storage_client):
+    file_stream.readlines.return_value = [
+        'Arcane', 'Castlevania', 'Cyberpunk Edgerunners', 'Squid Game'
+    ]
+    blob.open.return_value = file_stream
+    b = Backend(storage_client)
+    b.get_all_page_names()
+    text = b.genre_search('RomCom')
+    assert text == "No genre matches found for 'RomCom'"
+
+
+# Test for invalid queries in backend genre_search method.
+def test_genre_search_fail2(file_stream, blob, bucket, storage_client):
+    file_stream.readlines.return_value = [
+        'Arcane', 'Castlevania', 'Cyberpunk Edgerunners', 'Squid Game'
+    ]
+    blob.open.return_value = file_stream
+    b = Backend(storage_client)
+    b.get_all_page_names()
+    text = b.genre_search(123)
+    assert text == "No genre matches found for '123'"
+
+
+# Test for an existing genre, but no matching shows.
+def test_genre_search_fail3(file_stream, blob, bucket, storage_client):
+    file_stream.readlines.return_value = []
+    blob.open.return_value = file_stream
+    b = Backend(storage_client)
+    b.get_all_page_names()
+    text = b.genre_search('Romance')
+    print(text)
+    bucket.blob.assert_called_with('Romance.txt')
+    blob.open.assert_called_once()
+    file_stream.readlines.assert_called_once()
+    assert text == "No shows for 'Romance' yet"
