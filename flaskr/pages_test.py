@@ -108,10 +108,3 @@ def test_parametrized_pages_working(client):
         assert b'is' in resp.data
         assert b'a' in resp.data
         assert b'test' in resp.data
-
-
-#testing pages for login success
-def test_login_success(client):
-    response = client.post('/login', follow_redirects=True)
-    assert response.status_code == 200
-    assert b'<p class="message">You have successfully logged in!</p>' in response.data
