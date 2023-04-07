@@ -114,7 +114,11 @@ def test_parametrized_pages_working(client):
             assert b'is' in resp.data
             assert b'a' in resp.data
             assert b'test' in resp.data
-            # assert b'Genres: Action, Animation, Science Fiction, Thriller' in resp.data
+            assert b'Genres' in resp.data
+            assert b'Action' in resp.data
+            assert b'Animation' in resp.data
+            assert b'Science Fiction' in resp.data
+            assert b'Thriller' in resp.data
 
 #testing pages for login success
 def test_login_success(client):
