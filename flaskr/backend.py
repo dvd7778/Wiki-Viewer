@@ -44,6 +44,7 @@ class Backend:
         with content_blob.open('wb') as f:
             f.write(data)
     
+    # Saves the filename in every genre text file of the selected genres.
     def upload_genres(self, filename, genres):
         for genre in genres:
             genre_blob = self.genres_bucket.get_blob(genre + ".txt")
@@ -53,6 +54,17 @@ class Backend:
             with genre_blob.open('w') as file:
                 for i in range(len(text)):
                     file.write(text[i])
+
+    # Stores the assigned genres of a show in a list and returns it.
+    def get_genres(self, filename):
+        genre_blobs = self.genres_bucket.list_blobs()
+        genres = []
+        for genre_blob in genre_blobs:
+            with genre_blob.open() as file:
+                shows = file.readlines()
+                if filename + "\n" in shows:
+                    genres.append(genre_blob.name[:-4])
+        return genres
 
     #It stores password inside the file which named after each username in the gcs bucket.
     def sign_up(self, username, password, first_name, last_name):

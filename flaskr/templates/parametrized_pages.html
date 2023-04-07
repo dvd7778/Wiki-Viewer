@@ -2,11 +2,21 @@
 {% block title %}Best Netflix TV Shows{% endblock %}
 {% block content %}
         <h1>{{filename}}</h1>
+        <div style="text-align: left;">Genres: 
+            {% for i in range(genres|length) %}
+                {% if i == genres|length -1 %}
+                    {{genres[i]}}
+                {% else %}
+                    {{genres[i]}},
+                {% endif %}
+            {% endfor %}
+        </div>
+            <br></br>
             {% for line in text_lines %}
                 {% if line == ' \n' or line == '\n' %}
-                <br></br>
+                    <br></br>
                 {% else %}
-                <div style="text-align: left;">{{line}}</div>
+                    <div style="text-align: left;">{{line}}</div>
                 {% endif %}
             {% endfor %}
 {%endblock%}

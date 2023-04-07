@@ -40,9 +40,13 @@ def make_endpoints(app, login_manager):
         if not text_lines:
             filename = "Page not found."
             text_lines = []
+            genres = []
+        else:
+            genres = b.get_genres(filename)
         return render_template('parametrized_pages.html',
                                filename=filename,
-                               text_lines=text_lines)
+                               text_lines=text_lines, 
+                               genres=genres)
 
     # Route for the about page of the wiki
     @app.route("/about")

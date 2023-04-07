@@ -84,26 +84,37 @@ def test_register_page(client):
 
 # Tests that the parametrized pages renders a "Page not found." message when the page is not in the content bucket
 def test_parametrized_pages_fail(client):
-    filename = "TestFile"
-    resp = client.get(f'/pages/{filename}')
-    assert resp.status_code == 200
-    assert b'Page not found.' in resp.data
+    with patch('flaskr.backend.Backend.get_wiki_page') as get_wiki_page:
+        with patch('flaskr.backend.Backend.get_genres') as get_genres:
+            get_wiki_page.return_value = None
+            get_genres.return_value = []
+            filename = "TestFile"
+            resp = client.get(f'/pages/{filename}')
+            assert resp.status_code == 200
+            assert b'Page not found.' in resp.data
+            get_wiki_page.assert_called_once_with(filename)
+            get_genres.assert_not_called()
 
 
-# Tests that the parametrized pages renders a page with the parameter file's content
+# Tests that the parametrized pages renders a page with the parameter file's content and it's genres
 def test_parametrized_pages_working(client):
     with patch('flaskr.backend.Backend.get_wiki_page') as get_wiki_page:
-        filename = "TestFile"
-        filename_bytes = f'{filename}'.encode()
-        get_wiki_page.return_value = ["This", "is", "a", "test"]
-        resp = client.get(f'/pages/{filename}')
-        assert resp.status_code == 200
-        assert filename_bytes in resp.data
-        assert b'This' in resp.data
-        assert b'is' in resp.data
-        assert b'a' in resp.data
-        assert b'test' in resp.data
+        with patch('flaskr.backend.Backend.get_genres') as get_genres:
+            filename = "Cyberpunk Edgerunners"
+            filename_bytes = f'{filename}'.encode()
+            get_wiki_page.return_value = ["This", "is", "a", "test"]
+            get_genres.return_value = ["Action", "Animation", "Science Fiction", "Thriller"]
 
+            resp = client.get(f'/pages/{filename}')
+            get_genres.assert_called_once_with(filename)
+            get_wiki_page.assert_called_once_with(filename)
+            assert resp.status_code == 200
+            assert filename_bytes in resp.data
+            assert b'This' in resp.data
+            assert b'is' in resp.data
+            assert b'a' in resp.data
+            assert b'test' in resp.data
+            # assert b'Genres: Action, Animation, Science Fiction, Thriller' in resp.data
 
 #testing pages for login success
 def test_login_success(client):
