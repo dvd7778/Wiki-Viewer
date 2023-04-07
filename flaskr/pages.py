@@ -3,12 +3,11 @@ from flask import request
 from flask_login import login_user, current_user, logout_user, login_required
 from flaskr.backend import Backend
 from flaskr.forms import RegisterForm, LoginForm
-from .forms import RegisterForm, LoginForm
+from .forms import RegisterForm, LoginForm,ProfileForm
 import hashlib
 #from PIL import Image
 #import io
 from flaskr.models import User
-
 
 def make_endpoints(app, login_manager):
     b = Backend()
@@ -53,7 +52,13 @@ def make_endpoints(app, login_manager):
     # Route used to get an image
     @app.route('/get_image/<filename>')
     def retreive_image(filename):
-        return send_file(b.get_image(filename), mimetype='image/jpeg')
+        return send_file(b.get_image(filename), mimetype='image/jpg')
+    
+   # Route used to get an image
+    @app.route('/get_profile_img/<filename>')
+    def retreive_profile_image(filename):
+        return send_file(b.get_profile_img(filename), mimetype='image/jpg')
+    
 
     """
     This is the route for the registration page
@@ -116,11 +121,27 @@ def make_endpoints(app, login_manager):
                                title='Login',
                                form=form,
                                error=error)
-
+    
+    # EXT_FOR_PROFILE_PIC = set(['png','jpg','jpeg'])
+    # def allowed_file(filename):
+    #     return '.' in filename and filename.rsplit('.',1)[1].lower() in EXT_FOR_PROFILE_PIC
     @app.route("/profile", methods = ["GET", "POST"])
     def profile():
-        return render_template('profile.html', title="Profile")
+        if current_user.is_authenticated:
+            username = current_user.username
+            if request.method == 'GET':
+                # f = request.files['file']
+                # b.upload_profile(f.filename, f.stream.read(),username)
+                output = b.get_image_url(username)
+                print("CHECKKKKK",output)
+                return render_template('profile.html', profile_url = output, profile_picture = True )
+            if request.method == 'POST':
+                f = request.files['file']
+                b.upload_profile(f.filename, f.stream.read(),username)
+                output = b.get_image_profile(username)
+                return render_template('profile.html', profile_url = output, profile_picture = True )
 
+        return render_template('profile.html', title="Profile", profile_picture = False)
     
     @app.route("/search", methods = ["GET", "POST"])
     def search():
@@ -133,7 +154,11 @@ def make_endpoints(app, login_manager):
         user = User(user_id)
         info = b.get_user_info(user_id)
         first_name = info["Firstname"]
+        last_name = info["Secondname"]
+        email = info["email"]
         user.set_name(first_name)
+        user.set_last_name(last_name)
+        user.set_email(email)
         login_user(user)
         return user
 
@@ -157,3 +182,5 @@ def make_endpoints(app, login_manager):
             f = request.files['file']
             b.upload(f.filename, f.stream.read())
             return 'file uploaded successfully'
+
+   

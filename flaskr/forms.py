@@ -7,7 +7,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Length, EqualTo, ValidationError, Email
 from flask_login import UserMixin, LoginManager
-
+from flask_wtf.file import FileField
 
 class RegisterForm(FlaskForm):
     first_name = StringField('text', validators=[DataRequired()])
@@ -23,3 +23,6 @@ class LoginForm(FlaskForm):
     password = PasswordField('password', validators=[DataRequired()])
     remember_user = BooleanField('Remember Me')
     submit = SubmitField('Login')
+
+class ProfileForm(FlaskForm):
+    profile_pic = FileField('profile_pic')

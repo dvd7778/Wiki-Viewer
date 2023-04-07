@@ -4,7 +4,7 @@ import hashlib
 from io import BytesIO
 from flaskr import pages
 import json
-
+import secrets 
 
 # Class for backend objects.
 class Backend:
@@ -13,6 +13,7 @@ class Backend:
         self.storage_client = storage_client
         self.content_bucket = storage_client.bucket('wiki_content')
         self.userInfo_bucket = storage_client.bucket('users-passwords')
+        self.userProfile_bucket = storage_client.bucket('user-profile-pictures-wiki')
         self.page_names = []
 
     # Gets an uploaded page from the content bucket.
@@ -89,6 +90,7 @@ class Backend:
         info = json.loads(stored_info)
         information["Firstname"] = info["first_name"]
         information["Secondname"] = info["last_name"]
+        information["email"] = info["username"]
         return information
 
     # Gets an image from the content bucket.
@@ -96,3 +98,34 @@ class Backend:
         blob = self.content_bucket.get_blob(image_file)
         with blob.open('rb') as f:
             return BytesIO(f.read())
+
+    # Gets an image from the content bucket.
+    def get_profile_img(self, image_file):
+        print("WE ARE HERE>>>.")
+        blob = self.userProfile_bucket.get_blob(image_file)
+        with blob.open('rb') as f:
+            return BytesIO(f.read())
+
+    # Gets an image from the content bucket for default image.
+    def get_image_url(self, image_profile):
+        image_profile = image_profile + '.jpg'        
+        stats = storage.Blob(bucket=self.userProfile_bucket,
+                             name=image_profile).exists(self.storage_client)
+        if stats:
+            blob = self.userProfile_bucket.get_blob(image_profile)
+        else:
+            blob = self.content_bucket.get_blob(image_profile)
+        # with blob.open('rb') as f:
+        #     return BytesIO(f.read())
+        
+        return "/get_profile_img/" + image_profile
+        
+    
+    # Adds profile picture to the content bucket.
+    def upload_profile(self, filename, data,username):
+        file_info = filename.split('.')
+        filename = username + "." + file_info[1]
+        blob = self.userProfile_bucket.blob(filename)
+        with blob.open('wb') as f:
+            f.write(data)
+        
