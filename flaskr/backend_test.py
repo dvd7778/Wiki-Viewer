@@ -40,16 +40,19 @@ def storage_client(bucket):
 
 # Test for backend upload method.
 def test_upload(file_stream, blob, bucket, storage_client):
+    b = Backend(storage_client)
+    b.upload('test.txt', 'Hello World')
+    bucket.blob.assert_called_with('test.txt')
+    file_stream.write.assert_called_with('Hello World')
+
+def test_upload_genres(file_stream, blob, bucket, storage_client):
     file_stream.readlines.return_value = []
     b = Backend(storage_client)
-    b.upload('test.txt', 'Hello World', ['Action', 'Horror', 'Science Fiction'])
-    bucket.blob.assert_called_with('test.txt')
+    b.upload_genres('test.txt', ['Action', 'Horror', 'Science Fiction'])
     bucket.get_blob.assert_any_call('Action.txt')
     bucket.get_blob.assert_any_call('Horror.txt')
     bucket.get_blob.assert_called_with('Science Fiction.txt')
-    file_stream.write.assert_any_call('Hello World')
     file_stream.write.assert_called_with('test\n')
-
 
 # Test for backend get_image method
 def test_get_image(file_stream, blob, bucket, storage_client):

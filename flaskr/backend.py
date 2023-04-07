@@ -39,10 +39,12 @@ class Backend:
         return self.page_names
 
     # Adds data to the content bucket, and uploads the selected genres to the genre bucket.
-    def upload(self, filename, data, genres):
+    def upload(self, filename, data):
         content_blob = self.content_bucket.blob(filename)
         with content_blob.open('wb') as f:
             f.write(data)
+    
+    def upload_genres(self, filename, genres):
         for genre in genres:
             genre_blob = self.genres_bucket.get_blob(genre + ".txt")
             with genre_blob.open() as file:

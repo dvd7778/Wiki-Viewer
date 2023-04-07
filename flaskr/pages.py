@@ -155,25 +155,17 @@ def make_endpoints(app, login_manager):
         if request.method == 'POST':
             checkbox_names = ['genre_act', 'genre_adv', 'genre_anim', 'genre_com', 'genre_fant', 'genre_rom', 'genre_hor', 'genre_thr', 'genre_scifi', 'genre_drama']
             checked_genres = []
-            for genre in checkbox_names:
+
+            for genre in checkbox_names: # stores all of the selected genres in the checked_genres list
                 checked = request.form.get(genre)
                 if checked:
                     checked_genres.append(checked)
 
-            # action = request.form.get('genre_act')
-            # adventure = request.form.get('genre_adv')
-            # animation = request.form.get('genre_anim')
-            # comedy = request.form.get('genre_com')
-            # fantasy = request.form.get('genre_fant')
-            # romance = request.form.get('genre_rom')
-            # horror = request.form.get('genre_hor')
-            # thriller = request.form.get('genre_thr')
-            # scifi = request.form.get('genre_scifi')
-
             if not checked_genres:
                 return render_template('upload.html', error="No genres were selected. Please select at least one genre.")
             f = request.files['file']
-            b.upload(f.filename, f.stream.read(), checked_genres)
+            b.upload_genres(f.filename, checked_genres) # uploads the selected genres
+            b.upload(f.filename, f.stream.read()) # uploads the selected file
             return 'file uploaded successfully'
     
     
