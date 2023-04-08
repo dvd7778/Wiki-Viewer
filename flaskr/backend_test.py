@@ -212,4 +212,4 @@ def test_get_user_info(storage_client, blob, bucket, user_name, user_password,
     bucket.blob.assert_called_with(user_name + ".txt")
     assert json_output["first_name"] == output["Firstname"]
     assert json_output["last_name"] == output["Secondname"]
-    assert output == {"Firstname": "Barsha", "Secondname": "Chaudhary"}
+    assert output == {"Firstname": "Barsha", "Secondname": "Chaudhary", 'email':  'barsha@gmail.com' }
