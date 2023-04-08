@@ -129,18 +129,22 @@ def make_endpoints(app, login_manager):
     def profile():
         if current_user.is_authenticated:
             username = current_user.username
-            if request.method == 'GET':
-                # f = request.files['file']
-                # b.upload_profile(f.filename, f.stream.read(),username)
-                output = b.get_image_url(username)
-                print("CHECKKKKK",output)
-                return render_template('profile.html', profile_url = output, profile_picture = True )
-            if request.method == 'POST':
-                f = request.files['file']
-                b.upload_profile(f.filename, f.stream.read(),username)
-                output = b.get_image_profile(username)
-                return render_template('profile.html', profile_url = output, profile_picture = True )
-
+            output = b.get_image_url(username)
+            if output:
+                print("GETTTTTTTT>>>>>",output)
+                if request.method == 'GET':
+                    # f = request.files['file']
+                    # b.upload_profile(f.filename, f.stream.read(),username)
+                    output = b.get_image_url(username)
+                    return render_template('profile.html', profile_url = output, profile_picture = True )
+                if request.method == 'POST':
+                    f = request.files['file']
+                    b.upload_profile(f.filename, f.stream.read(),username)
+                    b.get_profile_img(username)
+                    print("?>>>>>>>>>>>>>POST")
+                    output = b.get_image_url(username)
+                    return render_template('profile.html', profile_url = output, profile_picture = True )
+            return render_template('profile.html', title="Profile", profile_picture = False)
         return render_template('profile.html', title="Profile", profile_picture = False)
     
     @app.route("/search", methods = ["GET", "POST"])

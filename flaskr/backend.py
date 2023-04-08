@@ -5,6 +5,7 @@ from io import BytesIO
 from flaskr import pages
 import json
 import secrets 
+import os
 
 # Class for backend objects.
 class Backend:
@@ -101,24 +102,25 @@ class Backend:
 
     # Gets an image from the content bucket.
     def get_profile_img(self, image_file):
-        print("WE ARE HERE>>>.")
         blob = self.userProfile_bucket.get_blob(image_file)
         with blob.open('rb') as f:
             return BytesIO(f.read())
 
     # Gets an image from the content bucket for default image.
     def get_image_url(self, image_profile):
-        image_profile = image_profile + '.jpg'        
-        stats = storage.Blob(bucket=self.userProfile_bucket,
-                             name=image_profile).exists(self.storage_client)
-        if stats:
-            blob = self.userProfile_bucket.get_blob(image_profile)
-        else:
-            blob = self.content_bucket.get_blob(image_profile)
-        # with blob.open('rb') as f:
-        #     return BytesIO(f.read())
-        
-        return "/get_profile_img/" + image_profile
+        blobs = self.userProfile_bucket.list_blobs(image_profile)
+        client = storage.Client()
+        bucket = client.get_bucket(self.userProfile_bucket)
+        blobs = bucket.list_blobs()
+        for blob in blobs:
+            blob_name = blob.name
+            split_up = os.path.splitext(blob_name)
+            file_name = split_up[0] 
+            if file_name == image_profile:
+                image_extension = split_up[1]
+                image_profile = image_profile + image_extension
+                return "/get_profile_img/" + image_profile 
+        return None
         
     
     # Adds profile picture to the content bucket.
