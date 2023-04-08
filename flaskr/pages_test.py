@@ -4,6 +4,7 @@ from unittest.mock import patch
 from flask import request, render_template, redirect, url_for, flash, session
 import pytest
 from flask_wtf.csrf import generate_csrf
+from flaskr import pages
 
 
 # See https://flask.palletsprojects.com/en/2.2.x/testing/
