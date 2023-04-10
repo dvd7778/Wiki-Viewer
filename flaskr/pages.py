@@ -3,10 +3,8 @@ from flask import request
 from flask_login import login_user, current_user, logout_user, login_required
 from flaskr.backend import Backend
 from flaskr.forms import RegisterForm, LoginForm
-from .forms import RegisterForm, LoginForm,ProfileForm
+from .forms import RegisterForm, LoginForm
 import hashlib
-#from PIL import Image
-#import io
 from flaskr.models import User
 
 def make_endpoints(app, login_manager):
@@ -122,29 +120,21 @@ def make_endpoints(app, login_manager):
                                form=form,
                                error=error)
     
-    # EXT_FOR_PROFILE_PIC = set(['png','jpg','jpeg'])
-    # def allowed_file(filename):
-    #     return '.' in filename and filename.rsplit('.',1)[1].lower() in EXT_FOR_PROFILE_PIC
+    
     @app.route("/profile", methods = ["GET", "POST"])
     def profile():
         if current_user.is_authenticated:
             username = current_user.username
-            output = b.get_image_url(username)
-            if output:
-                print("GETTTTTTTT>>>>>",output)
-                if request.method == 'GET':
-                    # f = request.files['file']
-                    # b.upload_profile(f.filename, f.stream.read(),username)
-                    output = b.get_image_url(username)
-                    return render_template('profile.html', profile_url = output, profile_picture = True )
-                if request.method == 'POST':
-                    f = request.files['file']
-                    b.upload_profile(f.filename, f.stream.read(),username)
-                    b.get_profile_img(username)
-                    print("?>>>>>>>>>>>>>POST")
-                    output = b.get_image_url(username)
-                    return render_template('profile.html', profile_url = output, profile_picture = True )
-            return render_template('profile.html', title="Profile", profile_picture = False)
+            if request.method == 'GET':
+                output = b.get_image_url(username)
+                if output is None:
+                    return render_template('profile.html', title="Profile", profile_picture = False)
+                return render_template('profile.html', profile_url = output, profile_picture = True )
+            if request.method == 'POST':
+                f = request.files['file']
+                b.upload_profile(f.filename, f.stream.read(),username)
+                output = b.get_image_url(username)
+                return render_template('profile.html', profile_url = output, profile_picture = True )
         return render_template('profile.html', title="Profile", profile_picture = False)
     
     @app.route("/search", methods = ["GET", "POST"])

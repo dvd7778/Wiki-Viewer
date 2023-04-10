@@ -24,5 +24,3 @@ class LoginForm(FlaskForm):
     remember_user = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
-class ProfileForm(FlaskForm):
-    profile_pic = FileField('profile_pic')

@@ -213,3 +213,61 @@ def test_get_user_info(storage_client, blob, bucket, user_name, user_password,
     assert json_output["first_name"] == output["Firstname"]
     assert json_output["last_name"] == output["Secondname"]
     assert output == {"Firstname": "Barsha", "Secondname": "Chaudhary", 'email':  'barsha@gmail.com' }
+
+def test_get_profile_img(file_stream, blob, bucket, storage_client):
+    file_stream.read.return_value = b'Image data'
+    b = Backend(storage_client)
+    b.get_image('test.png')
+    bucket.get_blob.assert_called_with('test.png')
+    file_stream.read.assert_called_once()
+
+@pytest.fixture
+def user_info1():
+    return {
+        "username": "barsha123@gmail.com",
+        "password": "pa$$word",
+        "first_name": "Barsha",
+        "last_name": "Chaudhary"
+    }
+
+
+#username from the json that is passed to the bucket
+@pytest.fixture
+#will be used in sign_up_test
+def user_name1(user_info):
+    return user_info["username"]
+
+#testing for user_profile does exist
+def test_get_image_url_exists(storage_client, blob, bucket, user_name,user_name1):
+    # Set up the mock objects
+    blob_names = [f"{user_name1}.png", f"{user_name}.jpg"]
+    blobs = [blob for blob_name in blob_names]
+    for i, blob in enumerate(blobs):
+        blob.name = blob_names[i]
+    bucket.list_blobs.return_value = blobs
+
+    # Call the method
+    b = Backend(storage_client)
+    result = b.get_image_url(user_name)
+    expected_result = f"/get_profile_img/{user_name}.jpg"
+    assert result == expected_result
+
+#testing for the user profile picture does not exist
+def test_get_image_url_not_exists(storage_client, blob, bucket, user_name):
+    blob_names = ["other_user.png", "other_user.jpg"]
+    blobs = [blob for blob_name in blob_names]
+    for i, blob in enumerate(blobs):
+        blob.name = blob_names[i]
+    bucket.list_blobs.return_value = blobs
+
+    # Call the method
+    b = Backend(storage_client)
+    result = b.get_image_url(user_name)
+    assert result is None
+
+#testing for upload/replace the profile picture 
+def test_upload_profile(file_stream,storage_client,blob,bucket,user_name):
+    b = Backend(storage_client)
+    b.upload('test.txt', 'Hello World')
+    bucket.blob.assert_called_with('test.txt')
+    file_stream.write.assert_called_with('Hello World')

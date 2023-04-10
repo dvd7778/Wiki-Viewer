@@ -4,7 +4,8 @@ from unittest.mock import patch
 from flask import request, render_template, redirect, url_for, flash, session
 import pytest
 from flask_wtf.csrf import generate_csrf
-
+from io import BytesIO
+from flaskr.models import User
 
 # See https://flask.palletsprojects.com/en/2.2.x/testing/
 # for more info on testing
@@ -108,3 +109,20 @@ def test_login_success(client):
     response = client.post('/login', follow_redirects=True)
     assert response.status_code == 200
     assert b'<p class="message">You have successfully logged in!</p>' in response.data
+
+#testing for the profile route
+def test_profile(client):
+    response = client.post('/profile',follow_redirects = True)
+    assert response.status_code == 200
+    assert b'Customize Your Profile Here' in response.data
+
+#testing for route to get image for profile
+def test_get_profile_img(client):
+    image_data = b'sample image data'
+    with patch('flaskr.backend.Backend.get_profile_img', return_value=BytesIO(image_data)):
+        resp = client.get('/get_profile_img/sample.jpg')
+    assert resp.status_code == 200
+    assert resp.mimetype == 'image/jpg'
+    assert resp.data == image_data
+
+

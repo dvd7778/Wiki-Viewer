@@ -100,34 +100,26 @@ class Backend:
         with blob.open('rb') as f:
             return BytesIO(f.read())
 
-    # Gets an image from the content bucket.
+    # Gets an image from the userProfile bucket
     def get_profile_img(self, image_file):
         blob = self.userProfile_bucket.get_blob(image_file)
         with blob.open('rb') as f:
             return BytesIO(f.read())
 
-    # Gets an image from the content bucket for default image.
-    def get_image_url(self, image_profile):
-        blobs = self.userProfile_bucket.list_blobs(image_profile)
-        client = storage.Client()
-        bucket = client.get_bucket(self.userProfile_bucket)
-        blobs = bucket.list_blobs()
+    # Gets image url for a image from the userprofile bucket
+    # returns None if user has not uploaded any profile picture.
+    def get_image_url(self, user_name):
+        blobs = list(self.userProfile_bucket.list_blobs(prefix=user_name))
         for blob in blobs:
-            blob_name = blob.name
-            split_up = os.path.splitext(blob_name)
-            file_name = split_up[0] 
-            if file_name == image_profile:
-                image_extension = split_up[1]
-                image_profile = image_profile + image_extension
-                return "/get_profile_img/" + image_profile 
+            if os.path.splitext(blob.name)[0] == user_name:
+                return f"/get_profile_img/{blob.name}"
         return None
-        
-    
-    # Adds profile picture to the content bucket.
-    def upload_profile(self, filename, data,username):
+
+    # Adds profile picture to the profileImage bucket.
+    def upload_profile(self, filename, data, username):
         file_info = filename.split('.')
-        filename = username + "." + file_info[1]
+        filename = f"{username}.{file_info[-1]}"
         blob = self.userProfile_bucket.blob(filename)
         with blob.open('wb') as f:
             f.write(data)
-        
+
