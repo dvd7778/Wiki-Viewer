@@ -133,3 +133,51 @@ def test_search_page(client):
     resp = client.get('/search')
     assert resp.status_code == 200
     assert b"Search For Netflix Shows" in resp.data
+
+def test_search_results_title_fail(client):
+    with patch('flaskr.backend.Backend.title_search') as title_search:
+        with patch('flaskr.backend.Backend.genre_search') as genre_search:
+            title_search.return_value = "No results"
+            genre_search.return_value = []
+            resp = client.post('/search', data = {'choice': 'Title', 'search': 'Fail'})
+            assert resp.status_code == 200
+            genre_search.assert_not_called()
+            title_search.assert_called_once_with('Fail')
+            assert b'No results' in resp.data
+
+def test_search_results_title_working(client):
+    with patch('flaskr.backend.Backend.title_search') as title_search:
+        with patch('flaskr.backend.Backend.genre_search') as genre_search:
+            title_search.return_value = ["Title", "pages"]
+            genre_search.return_value = []
+            resp = client.post('/search', data = {'choice': 'Title', 'search': 'Working'})
+            assert resp.status_code == 200
+            genre_search.assert_not_called()
+            title_search.assert_called_once_with('Working')
+            assert b'Results for Working' in resp.data
+            assert b'Title' in resp.data
+            assert b'pages' in resp.data
+
+def test_search_results_genre_fail(client):
+    with patch('flaskr.backend.Backend.title_search') as title_search:
+        with patch('flaskr.backend.Backend.genre_search') as genre_search:
+            genre_search.return_value = "No results"
+            title_search.return_value = []
+            resp = client.post('/search', data = {'choice': 'Genre', 'search': 'Fail'})
+            assert resp.status_code == 200
+            title_search.assert_not_called()
+            genre_search.assert_called_once_with('Fail')
+            assert b'No results' in resp.data
+    
+def test_search_results_genre_working(client):
+    with patch('flaskr.backend.Backend.title_search') as title_search:
+        with patch('flaskr.backend.Backend.genre_search') as genre_search:
+            genre_search.return_value = ["Genre", "pages"]
+            title_search.return_value = []
+            resp = client.post('/search', data = {'choice': 'Genre', 'search': 'Working'})
+            assert resp.status_code == 200
+            title_search.assert_not_called()
+            genre_search.assert_called_once_with('Working')
+            assert b'Results for Working' in resp.data
+            assert b'Genre' in resp.data
+            assert b'pages' in resp.data

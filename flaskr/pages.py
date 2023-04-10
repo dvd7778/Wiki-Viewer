@@ -138,12 +138,12 @@ def make_endpoints(app, login_manager,mail):
             elif radio == "Genre":
                 title_matches = b.genre_search(query)
             # Have to make search_results html
+            results_type = type(title_matches) == str
             return render_template('search_results.html',
                                    title="Search",
-                                   results=title_matches)
-
-            
-
+                                   results=title_matches,
+                                   results_type=results_type,
+                                   query=query)
         else:
             return render_template('search.html', title="Search")
 

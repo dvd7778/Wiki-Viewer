@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block title %}Best Netflix TV Shows{% endblock %}
+{% block content %}
+
+    {% if results_type == true %}
+        <h1>{{results}}</h1>
+    {% else %}
+        <h1>Results for {{query}}:</h1>
+        {% for result in results %}
+            <div><a href="{{url_for('parametrized_pages', filename=result)}}">{{result}}</a></div>
+        {% endfor %}
+    {% endif %}
+
+{% endblock %}
