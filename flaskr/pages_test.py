@@ -6,7 +6,7 @@ import pytest
 from flask_wtf.csrf import generate_csrf
 from io import BytesIO
 from flaskr.models import User
-
+from flask_login import AnonymousUserMixin as AnonymousUserMixin
 # See https://flask.palletsprojects.com/en/2.2.x/testing/
 # for more info on testing
 @pytest.fixture
@@ -127,4 +127,35 @@ def test_get_profile_img(client):
     assert resp.status_code == 200
     assert resp.mimetype == 'image/jpg'
     assert resp.data == image_data
+
+# from unittest import mock
+# import unittest
+# @mock.patch('flask_login.utils._get_user')
+# def test_current_user(self, current_user):
+#     user = mock.MagicMock() 
+#     user.__repr__ = lambda self: 'Mr Mocked'
+#     current_user.return_value = user
+#     client = app.test_client()
+#     response = client.get('/')
+#     data = response.data.decode('utf-8')
+#     print(data)
+
+
+
+@pytest.fixture(scope="module")
+def new_user():
+    user = User('barshachy@gmail.com')
+    return user
+@pytest.fixture
+def anonymous_user(client):
+    user = User(AnonymousUserMixin)
+    return user
+
+#test for profile when user is not logged in
+def test_profile_not_logged_in(client):
+    # Test POST when the user is not authenticated 
+    resp = client.post('/profile', follow_redirects=True)
+    assert resp.status_code == 200
+    assert b'Login to Wiki' in resp.data
+
 

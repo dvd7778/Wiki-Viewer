@@ -126,30 +126,61 @@ def make_endpoints(app, login_manager,mail):
                                title='Login',
                                form=form,
                                error=error)
+    # @login_required
+    # @app.route("/profile", methods = ["GET", "POST"])
+    # def profile():
+    #     username = current_user.username
+    #     if request.method == 'GET':
+    #         output = b.get_image_url(username)
+    #         if output is None:
+    #             flash('You need to upload your profile picture!')                
+    #             return render_template('profile.html', title="Profile", profile_picture = False)
+    #         return render_template('profile.html', profile_url = output, profile_picture = True )
+    #     if request.method == 'POST':
+    #         f = request.files['file']
+    #         if f.filename == '':
+    #             flash('No file selected')
+    #             output = b.get_image_url(username)
+    #             if not output:
+    #                 return render_template('profile.html', title="Profile", profile_picture = False)
+    #             return render_template('profile.html', profile_url = output, profile_picture = True )
+    #         if f:
+    #             b.upload_profile(f.filename, f.stream.read(),username)
+    #             output = b.get_image_url(username)
+    #             flash("Profile Picture Changed!")
+    #             return render_template('profile.html', profile_url = output, profile_picture = True)
+    #     return render_template('profile.html', title="Profile", profile_picture = False)          
+
     @login_required
     @app.route("/profile", methods = ["GET", "POST"])
     def profile():
-        username = current_user.username
-        if request.method == 'GET':
-            output = b.get_image_url(username)
-            if output is None:
-                flash('You need to upload your profile picture!')                
-                return render_template('profile.html', title="Profile", profile_picture = False)
-            return render_template('profile.html', profile_url = output, profile_picture = True )
-        if request.method == 'POST':
-            f = request.files['file']
-            if f.filename == '':
-                flash('No file selected')
+        if current_user.is_authenticated:
+            username = current_user.username
+            if request.method == 'GET':
                 output = b.get_image_url(username)
-                if not output:
-                    return render_template('profile.html', title="Profile", profile_picture = False)
-                return render_template('profile.html', profile_url = output, profile_picture = True )
-            if f:
-                b.upload_profile(f.filename, f.stream.read(),username)
-                output = b.get_image_url(username)
-                flash("Profile Picture Changed!")
-                return render_template('profile.html', profile_url = output, profile_picture = True)
-        return render_template('profile.html', title="Profile", profile_picture = False)          
+                if output:
+                    return render_template('profile.html', profile_url=output, profile_picture=True)
+                else:
+                    flash('You need to upload your profile picture!')
+                    return render_template('profile.html', title="Profile", profile_picture=False)
+            
+            if request.method == 'POST':
+                try:
+                    f = request.files['file']
+                    if not f.filename:
+                        flash('No file selected')
+                        return redirect(url_for('profile'))
+                    b.upload_profile(f.filename, f.stream.read(), username)
+                    flash("Profile Picture Changed!")
+                except Exception as e:
+                    flash(f"Upload failed: {e}")
+                
+                return redirect(url_for('profile'))
+            
+            return render_template('profile.html', title="Profile", profile_picture=False)
+        else:
+            return redirect(url_for('login'))
+
 
     @app.route("/search", methods = ["GET", "POST"])
     def search():
