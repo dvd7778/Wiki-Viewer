@@ -6,8 +6,15 @@ from flaskr.forms import RegisterForm, LoginForm
 from flaskr.forms import RegisterForm, LoginForm, ResetPasswordForm, RequestResetForm
 import hashlib
 from flaskr.models import User
+import re
+from flask_mail import Message
+from itsdangerous import URLSafeTimedSerializer
+from itsdangerous import URLSafeTimedSerializer as Serializer
+from flask import render_template_string
+from flask import render_template_string, url_for
+from itsdangerous import URLSafeTimedSerializer
 
-def make_endpoints(app, login_manager):
+def make_endpoints(app, login_manager,mail):
     b = Backend()
     # Flask uses the "app.route" decorator to call methods when users
     # go to a specific route on the project's website.
