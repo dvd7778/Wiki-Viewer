@@ -116,9 +116,16 @@ class Backend:
         return None
 
     # Adds profile picture to the profileImage bucket.
-    def upload_profile(self, filename, data, username):
+    def upload_profile(self, filename, data, user_name):
+        blobs = list(self.userProfile_bucket.list_blobs(prefix=user_name))
+        if blobs:
+            for blob in blobs:
+                if os.path.splitext(blob.name)[0] == user_name:
+                    filename_to_remove = user_name + os.path.splitext(blob.name)[-1]
+                    blob_to_remove = self.userProfile_bucket.blob(filename_to_remove)
+                    blob_to_remove.delete()
         file_info = filename.split('.')
-        filename = f"{username}.{file_info[-1]}"
+        filename = f"{user_name}.{file_info[-1]}"
         blob = self.userProfile_bucket.blob(filename)
         with blob.open('wb') as f:
             f.write(data)

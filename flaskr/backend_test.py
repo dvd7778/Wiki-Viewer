@@ -4,7 +4,7 @@ import unittest
 import json
 import pytest
 import hashlib
-
+import os
 
 #Testing for upload() and get_image()
 @pytest.fixture
@@ -265,9 +265,29 @@ def test_get_image_url_not_exists(storage_client, blob, bucket, user_name):
     result = b.get_image_url(user_name)
     assert result is None
 
-#testing for upload/replace the profile picture 
-def test_upload_profile(file_stream,storage_client,blob,bucket,user_name):
+# #testing for upload/replace the profile picture 
+def test_upload_profile(file_stream, blob, bucket, storage_client, user_name):
+    # Set up the mock bucket to list blobs with other_user.png and other_user.jpg.
+    blob_names = ["other_user.png", "other_user.jpg"]
+    blobs = [blob for blob_name in blob_names]
+    for i, blob in enumerate(blobs):
+        blob.name = blob_names[i]
+    bucket.list_blobs.return_value = blobs
+
+    # Call the method being tested.
     b = Backend(storage_client)
-    b.upload('test.txt', 'Hello World')
-    bucket.blob.assert_called_with('test.txt')
-    file_stream.write.assert_called_with('Hello World')
+    b.upload_profile('test.png', 'file data', user_name)
+
+    # Check that the previous profile picture (if it exists) was deleted.
+    for blob in blobs:
+        if os.path.splitext(blob.name)[0] == user_name:
+            filename_to_remove = user_name + os.path.splitext(blob.name)[-1]
+            blob_to_remove = bucket.blob(filename_to_remove)
+            blob_to_remove.delete.assert_called_once()
+
+    # Check that a new profile picture was uploaded.
+    filename = f"{user_name}.png"
+    bucket.blob.assert_called_with(filename)
+    blob = bucket.blob.return_value
+    blob.open.assert_called_once_with('wb')
+    file_stream.write.assert_called_once_with('file data')

@@ -65,14 +65,6 @@ def test_login_page(client):
     assert resp.status_code == 200
     assert b"Login to Wiki" in resp.data
 
-
-# Test for login route fail.
-def test_login_fail(client):
-    resp = client.get('/login')
-    assert resp.status_code == 200
-    assert b"Login to Wiki" in resp.data
-
-
 # Test for register route.
 def test_register_page(client):
     resp = client.get('/register')
@@ -125,4 +117,22 @@ def test_get_profile_img(client):
     assert resp.mimetype == 'image/jpg'
     assert resp.data == image_data
 
+# #test for login test fail
+# def test_login_fail_alt(client):
+#     with patch('flaskr.backend.Backend') as mock_backend:
+#         with patch('flaskr.backend.Backend.LoginForm') as mock_form:
+#             mock_form.validate_on_submit.return_value = True
+#             mock_backend.sign_in.return_value = False
+#             resp = client.post('/login',data = {"email": "Barshachy@gmail.com", "password": "password"})
+#             assert resp.status_code == 200
+#             assert b'Login Unsuccessful! Please check your username and password again!' in resp.data
 
+# Test for login route fail.
+# @patch('flaskr.backend.Backend')
+# @patch('flaskr.forms.LoginForm')
+# def test_login_fail(mock_backend, mock_form, client):
+#     # mock_form.validate_on_submit.return_value = True
+#     # mock_backend.sign_in.return_value = False
+#     resp = client.post('/login',data = {"email": "barshachy1234@gmail.com", "password": "Hello12"})
+#     assert resp.status_code == 200
+#     assert b'Login Unsuccessful! Please check your username and password again!' in resp.data    
