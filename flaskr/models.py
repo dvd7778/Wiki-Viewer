@@ -1,5 +1,7 @@
 from flask_login import LoginManager, UserMixin
 from flask import Flask
+from itsdangerous import URLSafeTimedSerializer
+
 """
 User class which gets username and returns unique id for the user
 Includes method like is_authenticated, logout user, get_name which are used in pages

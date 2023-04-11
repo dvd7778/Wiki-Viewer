@@ -6,8 +6,8 @@ from flask import request
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Length, EqualTo, ValidationError, Email
-from flask_login import UserMixin, LoginManager
-from flask_wtf.file import FileField
+from flask_login import UserMixin,LoginManager
+from wtforms import validators
 
 class RegisterForm(FlaskForm):
     first_name = StringField('text', validators=[DataRequired()])
@@ -24,3 +24,12 @@ class LoginForm(FlaskForm):
     remember_user = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
+class RequestResetForm(FlaskForm):
+    email = StringField('email', [DataRequired("Please enter your email address."), Email("This field requires a valid email address")])
+    submit  = SubmitField('Request Password Reset')
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('password', validators=[DataRequired()])
+    confirm_password = PasswordField('confirm_password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Reset Password')
+    
