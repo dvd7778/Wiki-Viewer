@@ -1,8 +1,9 @@
 from flaskr import pages
-
+from flask_mail import Mail
 from flask import Flask
 from flask_login import LoginManager
 import logging
+import os
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -43,5 +44,5 @@ def create_app(test_config=None):
     login_manager = LoginManager()
     login_manager.init_app(app)
     mail = Mail(app)
-    pages.make_endpoints(app, login_manager,mail)
+    pages.make_endpoints(app, login_manager, mail)    
     return app
