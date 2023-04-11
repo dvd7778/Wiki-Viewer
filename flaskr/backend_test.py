@@ -265,7 +265,7 @@ def test_get_image_url_not_exists(storage_client, blob, bucket, user_name):
     result = b.get_image_url(user_name)
     assert result is None
 
-# #testing for upload/replace the profile picture 
+#testing for upload/replace the profile picture 
 def test_upload_profile(file_stream, blob, bucket, storage_client, user_name):
     # Set up the mock bucket to list blobs with other_user.png and other_user.jpg.
     blob_names = ["other_user.png", "other_user.jpg"]

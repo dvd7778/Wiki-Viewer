@@ -119,24 +119,31 @@ def make_endpoints(app, login_manager):
                                title='Login',
                                form=form,
                                error=error)
-    
-    
+    @login_required
     @app.route("/profile", methods = ["GET", "POST"])
     def profile():
-        if current_user.is_authenticated:
-            username = current_user.username
-            if request.method == 'GET':
+        username = current_user.username
+        if request.method == 'GET':
+            output = b.get_image_url(username)
+            if output is None:
+                flash('You need to upload your profile picture!')                
+                return render_template('profile.html', title="Profile", profile_picture = False)
+            return render_template('profile.html', profile_url = output, profile_picture = True )
+        if request.method == 'POST':
+            f = request.files['file']
+            if f.filename == '':
+                flash('No file selected')
                 output = b.get_image_url(username)
-                if output is None:
+                if not output:
                     return render_template('profile.html', title="Profile", profile_picture = False)
                 return render_template('profile.html', profile_url = output, profile_picture = True )
-            if request.method == 'POST':
-                f = request.files['file']
+            if f:
                 b.upload_profile(f.filename, f.stream.read(),username)
                 output = b.get_image_url(username)
-                return render_template('profile.html', profile_url = output, profile_picture = True )
-        return render_template('profile.html', title="Profile", profile_picture = False)
-    
+                flash("Profile Picture Changed!")
+                return render_template('profile.html', profile_url = output, profile_picture = True)
+        return render_template('profile.html', title="Profile", profile_picture = False)          
+
     @app.route("/search", methods = ["GET", "POST"])
     def search():
         return render_template('search.html', title="Search")
