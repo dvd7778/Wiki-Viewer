@@ -1,8 +1,6 @@
-from flask import render_template, redirect, url_for, flash, send_file
-from flask import request
+from flask import render_template, redirect, url_for, flash, send_file, request
 from flask_login import login_user, current_user, logout_user, login_required
 from flaskr.backend import Backend
-from flaskr.forms import RegisterForm, LoginForm
 from flaskr.forms import RegisterForm, LoginForm, ResetPasswordForm, RequestResetForm
 import hashlib
 from flaskr.models import User
@@ -10,7 +8,6 @@ import re
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer
 from itsdangerous import URLSafeTimedSerializer as Serializer
-from flask import render_template_string
 from flask import render_template_string, url_for
 from itsdangerous import URLSafeTimedSerializer
 
@@ -126,30 +123,6 @@ def make_endpoints(app, login_manager,mail):
                                title='Login',
                                form=form,
                                error=error)
-    # @login_required
-    # @app.route("/profile", methods = ["GET", "POST"])
-    # def profile():
-    #     username = current_user.username
-    #     if request.method == 'GET':
-    #         output = b.get_image_url(username)
-    #         if output is None:
-    #             flash('You need to upload your profile picture!')                
-    #             return render_template('profile.html', title="Profile", profile_picture = False)
-    #         return render_template('profile.html', profile_url = output, profile_picture = True )
-    #     if request.method == 'POST':
-    #         f = request.files['file']
-    #         if f.filename == '':
-    #             flash('No file selected')
-    #             output = b.get_image_url(username)
-    #             if not output:
-    #                 return render_template('profile.html', title="Profile", profile_picture = False)
-    #             return render_template('profile.html', profile_url = output, profile_picture = True )
-    #         if f:
-    #             b.upload_profile(f.filename, f.stream.read(),username)
-    #             output = b.get_image_url(username)
-    #             flash("Profile Picture Changed!")
-    #             return render_template('profile.html', profile_url = output, profile_picture = True)
-    #     return render_template('profile.html', title="Profile", profile_picture = False)          
 
     @login_required
     @app.route("/profile", methods = ["GET", "POST"])
