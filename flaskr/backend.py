@@ -4,7 +4,9 @@ import hashlib
 from io import BytesIO
 from flaskr import pages
 import json
-
+from flask_mail import Message
+from itsdangerous import URLSafeTimedSerializer
+import re
 
 # Class for backend objects.
 class Backend:
@@ -120,6 +122,24 @@ class Backend:
             # return True
         else:
             return False
+    
+    
+    # email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    # def send_reset_email(self,user,config,mail):
+    #     # check if user is a valid email address
+    #     email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 
+    #     if not re.match(email_regex, user):
+    #         raise ValueError('Invalid email address')
+
+    #     s = URLSafeTimedSerializer(config['SECRET_KEY'], salt='reset-password')
+    #     token = s.dumps({'user': user})
+    #     msg = Message('Password Reset Request', sender='noreply@demo.com', recipients=[user])
+    #     msg.body = f'''To reset your password visit the following link: 
+    #         {url_for('reset_token', token=token, _external=True)}
+
+    #         If you did not send the request to change your password, simply ignore this email.
+    #         '''
+    #     mail.send(msg)
 
 

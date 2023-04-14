@@ -108,3 +108,45 @@ def test_parametrized_pages_working(client):
         assert b'is' in resp.data
         assert b'a' in resp.data
         assert b'test' in resp.data
+
+#testing for reset_request
+# @patch('flaskr.backend.Backend')
+@patch('flaskr.forms.RequestResetForm')
+def test_reset_email(mock_form,client):
+    with patch('flaskr.backend.Backend.check_if_registered') as check_if_registered:
+        with patch('flask_mail.Mail.send') as send_mail:
+            email = "barshachaudhary@techexchange.in"
+            mock_form.validate_on_submit.return_value = True
+            mock_form.email.data.return_value = email
+            check_if_registered.return_value = True
+            resp = client.post('/reset_password',data = {"email": email},follow_redirects=True
+)
+            message = send_mail.call_args[0][0]
+            assert message.sender == 'noreply@demo.com'
+            assert message.recipients == [email]
+            assert resp.status_code == 200
+            assert resp.request.path == '/login'
+            send_mail.assert_called_once()
+
+
+
+
+
+
+# @app.route('/reset_password',methods = ['POST', 'GET'])
+#     def reset_request():
+#         if current_user.is_authenticated:
+#             return redirect(url_for('home'))
+#         error = None
+#         form = RequestResetForm()
+#         if form.validate_on_submit() and request.method == "POST":
+#             user = form.email.data.lower()
+#             check_if_correct = b.check_if_registered(user)
+#             if check_if_correct:
+#                 send_reset_email(user)
+#                 flash('Password reset link sent to your email!')
+#                 return redirect(url_for('login'))
+#             else:
+#                 error = 'Your email is not registered'
+#                 return render_template('reset_request.html',title = 'Reset Password', form = form, error = error )      
+#         return render_template('reset_request.html',title = 'Reset Password',form = form)
