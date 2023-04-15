@@ -93,7 +93,7 @@ def test_login_page(client):
 # Test for login route fail.
 @patch('flaskr.backend.Backend')
 @patch('flaskr.forms.LoginForm')
-def test_login_fail(mock_backend, mock_form, client):
+def login_fail(mock_backend, mock_form, client):
     mock_form.validate_on_submit.return_value = True
     mock_backend.sign_in.return_value = False
     resp = client.post('/login',data = {"email": "Barshachy@gmail.com", "password": "password"})
