@@ -2,7 +2,7 @@
 {% block title %}Best Netflix TV Shows{% endblock %}
 {% block content %}
 
-    {% if results_type == true %}
+    {% if is_str == true %}
         <h1>{{results}}</h1>
     {% else %}
         <h1>Results for {{query}}:</h1>
