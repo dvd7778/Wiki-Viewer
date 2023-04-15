@@ -5,9 +5,9 @@
         <div style="text-align: left;">Genres: 
             {% for i in range(genres|length) %}
                 {% if i == genres|length -1 %}
-                    {{genres[i]}}
+                    {{genres[i]}} <!--Shows the last genre so it does not have a comma after it-->
                 {% else %}
-                    {{genres[i]}},
+                    {{genres[i]}}, <!--Shows a genre followed by a comma, because it is not the last genre-->
                 {% endif %}
             {% endfor %}
         </div>

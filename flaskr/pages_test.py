@@ -4,6 +4,7 @@ from unittest.mock import patch
 from flask import request, render_template, redirect, url_for, flash, session
 import pytest
 from flask_wtf.csrf import generate_csrf
+import io
 
 
 # See https://flask.palletsprojects.com/en/2.2.x/testing/
@@ -33,14 +34,35 @@ def test_home_page(client):
     assert b"Welcome to the NetflixSeries Wiki!" in resp.data
 
 
-# Test for upload route.
-def test_upload_page(client):
+# Test for getting the upload route.
+def test_upload_page_get(client):
     resp = client.get('/upload')
     assert resp.status_code == 200
     assert b"Upload File to the Wiki" in resp.data
     #Test for the feature1-adding genre clickable button
     assert b"Select at least one genre the show belong to:" in resp.data
 
+# Test for a correct upload in the upload page
+def test_upload_page_post_working(client):
+    with patch('flaskr.backend.Backend.upload') as upload:
+        with patch('flaskr.backend.Backend.upload_genres') as upload_genres:
+            resp = client.post('/upload', data = {'file' : (io.BytesIO(b"test"), 'Wednesday.txt'), 'genre_adv' : 'Adventure', 'genre_hor' : 'Horror'})
+            assert resp.status_code == 200
+            upload_genres.assert_called_once_with('Wednesday.txt', ['Adventure', 'Horror'])
+            upload.assert_called_once_with('Wednesday.txt', b"test")
+            assert b"file uploaded successfully" in resp.data
+
+# Test that the file is not uploaded if no genres were selected
+def test_upload_page_post_fail(client):
+    with patch('flaskr.backend.Backend.upload') as upload:
+        with patch('flaskr.backend.Backend.upload_genres') as upload_genres:
+            resp = client.post('/upload', data = {'file' : (io.BytesIO(b"test"), 'Wednesday.txt')})
+            assert resp.status_code == 200
+            upload_genres.assert_not_called()
+            upload.assert_not_called()
+            assert b"No genres were selected. Please select at least one genre." in resp.data
+            assert b"Upload File to the Wiki" in resp.data
+            assert b"Select at least one genre the show belong to:" in resp.data
 
 # Tests the pages page renders correctly and the list of the uploaded pages
 def test_pages_page(client):
@@ -89,10 +111,10 @@ def test_register_page(client):
 
 # Tests that the parametrized pages renders a "Page not found." message when the page is not in the content bucket
 def test_parametrized_pages_fail(client):
-    with patch('flaskr.backend.Backend.get_wiki_page') as get_wiki_page:
-        with patch('flaskr.backend.Backend.get_genres') as get_genres:
-            get_wiki_page.return_value = None
-            get_genres.return_value = []
+    with patch('flaskr.backend.Backend.get_wiki_page') as get_wiki_page: # patches the get_wiki_page Backend method
+        with patch('flaskr.backend.Backend.get_genres') as get_genres: # patches the get_genres Backend method
+            get_wiki_page.return_value = None # sets the return value for the patched get_wiki_page method to None
+            get_genres.return_value = [] # sets the return value of the patched get_genres method to an empty list
             filename = "TestFile"
             resp = client.get(f'/pages/{filename}')
             assert resp.status_code == 200
@@ -103,12 +125,14 @@ def test_parametrized_pages_fail(client):
 
 # Tests that the parametrized pages renders a page with the parameter file's content and it's genres
 def test_parametrized_pages_working(client):
-    with patch('flaskr.backend.Backend.get_wiki_page') as get_wiki_page:
-        with patch('flaskr.backend.Backend.get_genres') as get_genres:
+    with patch('flaskr.backend.Backend.get_wiki_page') as get_wiki_page: # patches the get_wiki_page Backend method
+        with patch('flaskr.backend.Backend.get_genres') as get_genres: # patches the get_genres Backend method
             filename = "Cyberpunk Edgerunners"
             filename_bytes = f'{filename}'.encode()
+            # sets the return value for the patched get_wiki_page method to a list of strings
             get_wiki_page.return_value = ["This", "is", "a", "test"]
-            get_genres.return_value = ["Action", "Animation", "Science Fiction", "Thriller"]
+            # sets the return value of the patched get_genres method to a list of genres as strings
+            get_genres.return_value = ["Action", "Animation", "Science Fiction", "Thriller"] 
 
             resp = client.get(f'/pages/{filename}')
             get_genres.assert_called_once_with(filename)

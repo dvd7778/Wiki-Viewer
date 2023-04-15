@@ -74,6 +74,13 @@ def test_get_genres_missing(file_stream, blob, bucket, storage_client):
     bucket.list_blobs.assert_called_once()
     assert len(genres) == 0
 
+def test_get_genres_no_blob(file_stream, blob, bucket, storage_client):
+    bucket.list_blobs.return_value = []
+    b = Backend(storage_client)
+    genres = b.get_genres("Test")
+    bucket.list_blobs.assert_called_once()
+    assert len(genres) == 0
+
 # Test for backend get_image method
 def test_get_image(file_stream, blob, bucket, storage_client):
     file_stream.read.return_value = b'Image data'

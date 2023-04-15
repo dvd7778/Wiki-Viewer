@@ -157,7 +157,7 @@ def make_endpoints(app, login_manager,mail):
     # Returns html for upload
     @app.route('/upload', methods=['GET'])
     def upload_page():
-        return render_template('upload.html', error=None)
+        return render_template('upload.html', error=None) # error is None because it is used when a genre is not selected when uploading
 
     # Route for uploading files to the GCS bucket
     @app.route('/upload', methods=['POST'])
@@ -172,6 +172,7 @@ def make_endpoints(app, login_manager,mail):
                     checked_genres.append(checked)
 
             if not checked_genres:
+                # There is an error because there was no genre selected when there should have
                 return render_template('upload.html', error="No genres were selected. Please select at least one genre.")
             f = request.files['file']
             b.upload_genres(f.filename, checked_genres) # uploads the selected genres
