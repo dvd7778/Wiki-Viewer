@@ -276,7 +276,7 @@ def test_multiple_genre_search_success(file_stream, blob, bucket,
 
 
 # Test for wrong input type for backend genre_search method.
-def test_genre_search_fail1(file_stream, blob, bucket, storage_client):
+def test_genre_search_wrong_type(file_stream, blob, bucket, storage_client):
     file_stream.readlines.return_value = [
         'Arcane', 'Castlevania', 'Cyberpunk Edgerunners', 'Squid Game'
     ]
@@ -288,7 +288,7 @@ def test_genre_search_fail1(file_stream, blob, bucket, storage_client):
 
 
 # Test for invalid queries in backend genre_search method.
-def test_genre_search_fail2(file_stream, blob, bucket, storage_client):
+def test_genre_search_invalid_queries(file_stream, blob, bucket, storage_client):
     file_stream.readlines.return_value = [
         'Arcane', 'Castlevania', 'Cyberpunk Edgerunners', 'Squid Game'
     ]
@@ -300,7 +300,7 @@ def test_genre_search_fail2(file_stream, blob, bucket, storage_client):
 
 
 # Test for an existing genre, but no matching shows.
-def test_genre_search_fail3(file_stream, blob, bucket, storage_client):
+def test_genre_search_genre_without_shows(file_stream, blob, bucket, storage_client):
     file_stream.readlines.return_value = []
     blob.open.return_value = file_stream
     b = Backend(storage_client)

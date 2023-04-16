@@ -2,7 +2,7 @@
 from google.cloud import storage
 import hashlib
 from io import BytesIO
-#from flaskr import pages uncomment this
+#from flaskr import pages 
 import json
 import difflib
 import os
@@ -110,7 +110,8 @@ class Backend:
 
     # Gets the corresponding titles from a genre search.
     def genre_search(self, query):  
-        if type(query) != type(''):
+        # Checks correct type
+        if not isinstance(query, str):
             return 'No genre matches found for ' + "'" + str(query) + "'"
         matches = set()
         queries = query.split(',')
@@ -118,15 +119,18 @@ class Backend:
             'action', 'adventure', 'animation', 'thriller', 'comedy', 'drama',
             'romance', 'science fiction', 'fantasy'
         ]
-        bad_queries = []
+        bad_queries = [] # Any queries that don't match a genre
         for genre in queries:
             if genre.strip().lower() not in genres:
                 bad_queries.append(genre)
+        # Checks if all queries are bad
         if len(bad_queries) == len(queries):
             return 'No genre matches found for ' + "'" + query + "'"
+        # Removes any bad queries
         for query in queries:
             if query in bad_queries:
                 queries.remove(query)
+    
         for genre in queries:
             blob = self.show_genre_bucket.blob(genre.strip().capitalize() +
                                                '.txt')
@@ -134,6 +138,7 @@ class Backend:
             content = f.readlines()
             for show in content:
                 matches.add(show.strip())
+        # Checks if there are no matches
         if not matches:
             return 'No shows for ' + "'" + query + "'" + ' yet'
         return matches
@@ -164,6 +169,4 @@ class Backend:
             return True
         else:
             return False
-
-
 

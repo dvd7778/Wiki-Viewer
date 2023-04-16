@@ -141,9 +141,6 @@ def make_endpoints(app, login_manager,mail):
             return render_template('search_results.html',
                                    title="Search",
                                    results=title_matches)
-
-            
-
         else:
             return render_template('search.html', title="Search")
 
