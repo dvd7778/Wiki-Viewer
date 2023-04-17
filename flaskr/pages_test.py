@@ -63,7 +63,7 @@ def test_upload_page_post_fail(client):
             upload_genres.assert_not_called()
             upload.assert_not_called()
             assert b"No genres were selected. Please select at least one genre." in resp.data
-            assert b"Upload File to the Wiki" in resp.data
+            assert b"Upload Shows to the Wiki" in resp.data
             assert b"Select at least one genre the show belong to:" in resp.data
 
 # Tests the pages page renders correctly and the list of the uploaded pages

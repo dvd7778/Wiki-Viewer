@@ -51,7 +51,7 @@ class Backend:
     # Saves the filename in every genre text file of the selected genres.
     def upload_genres(self, filename, genres):
         for genre in genres:
-            genre_blob = self.genres_bucket.get_blob(genre + ".txt")
+            genre_blob = self.show_genre_bucket.get_blob(genre + ".txt")
             with genre_blob.open() as file:
                 text = file.readlines()
                 text.append(filename[:-4] + "\n")
@@ -61,7 +61,7 @@ class Backend:
 
     # Stores the assigned genres of a show in a list and returns it.
     def get_genres(self, filename):
-        genre_blobs = self.genres_bucket.list_blobs()
+        genre_blobs = self.show_genre_bucket.list_blobs()
         genres = []
         for genre_blob in genre_blobs:
             with genre_blob.open() as file:
