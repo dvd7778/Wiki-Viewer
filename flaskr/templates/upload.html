@@ -2,6 +2,9 @@
 {% block title %}Upload{% endblock %}
 {% block content %} 
     <h1>Upload Shows to the Wiki</h1>
+    {% if error %}
+        <p> <strong> Error </strong> : {{error}} </p>
+    {% endif %}
     <style>
         .checkbox-round {
             width: 1.8em;
@@ -31,12 +34,14 @@
          <label for="genre_adv"> Action</label><br>
          <input type="checkbox" class = "checkbox-round" name="genre_anim" value="Animation">
          <label for="genre_adv"> Animation</label><br>
-         <input type="checkbox" class = "checkbox-round" name="genre_som" value="Comedy">
+         <input type="checkbox" class = "checkbox-round" name="genre_com" value="Comedy">
          <label for="genre_adv"> Comedy</label><br>
          <input type="checkbox" class = "checkbox-round" name="genre_drama" value="Drama">
          <label for="genre_adv"> Drama</label><br>
          <input type="checkbox" class = "checkbox-round" name="genre_fant" value="Fantasy">
          <label for="genre_adv"> Fantasy</label><br>
+         <input type="checkbox" class = "checkbox-round" name="genre_hor" value="Horror">
+         <label for="genre_adv"> Horror </label><br>
          <input type="checkbox" class = "checkbox-round" name="genre_rom" value="Romance">
          <label for="genre_adv"> Romance </label><br>
          <input type="checkbox" class = "checkbox-round" name="genre_scifi" value="Science Fiction">

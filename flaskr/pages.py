@@ -42,9 +42,13 @@ def make_endpoints(app, login_manager,mail):
         if not text_lines:
             filename = "Page not found."
             text_lines = []
+            genres = []
+        else:
+            genres = b.get_genres(filename)
         return render_template('parametrized_pages.html',
                                filename=filename,
-                               text_lines=text_lines)
+                               text_lines=text_lines, 
+                               genres=genres)
 
     # Route for the about page of the wiki
     @app.route("/about")
@@ -212,14 +216,26 @@ def make_endpoints(app, login_manager,mail):
     # Returns html for upload
     @app.route('/upload', methods=['GET'])
     def upload_page():
-        return render_template('upload.html')
+        return render_template('upload.html', error=None) # error is None because it is used when a genre is not selected when uploading
 
     # Route for uploading files to the GCS bucket
     @app.route('/upload', methods=['POST'])
     def upload_file():
         if request.method == 'POST':
+            checkbox_names = ['genre_act', 'genre_adv', 'genre_anim', 'genre_com', 'genre_fant', 'genre_rom', 'genre_hor', 'genre_thr', 'genre_scifi', 'genre_drama']
+            checked_genres = []
+
+            for genre in checkbox_names: # stores all of the selected genres in the checked_genres list
+                checked = request.form.get(genre)
+                if checked:
+                    checked_genres.append(checked)
+
+            if not checked_genres:
+                # There is an error because there was no genre selected when there should have
+                return render_template('upload.html', error="No genres were selected. Please select at least one genre.")
             f = request.files['file']
-            b.upload(f.filename, f.stream.read())
+            b.upload_genres(f.filename, checked_genres) # uploads the selected genres
+            b.upload(f.filename, f.stream.read()) # uploads the selected file
             return 'file uploaded successfully'
 
    

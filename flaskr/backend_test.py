@@ -38,13 +38,48 @@ def storage_client(bucket):
     return storage_client
 
 
-# Test for backend upload method.
+# Test for backend upload method
 def test_upload(file_stream, blob, bucket, storage_client):
     b = Backend(storage_client)
     b.upload('test.txt', 'Hello World')
     bucket.blob.assert_called_with('test.txt')
     file_stream.write.assert_called_with('Hello World')
 
+# Test for backend upload_genres method
+def test_upload_genres(file_stream, blob, bucket, storage_client):
+    file_stream.readlines.return_value = []
+    b = Backend(storage_client)
+    b.upload_genres('test.txt', ['Action', 'Horror', 'Science Fiction'])
+    bucket.get_blob.assert_any_call('Action.txt')
+    bucket.get_blob.assert_any_call('Horror.txt')
+    bucket.get_blob.assert_called_with('Science Fiction.txt')
+    file_stream.write.assert_called_with('test\n')
+
+# Test for backend get_genres method when the blob contains the filename
+def test_get_genres_containing(file_stream, blob, bucket, storage_client):
+    file_stream.readlines.return_value = ["Wrong\n", "Name\n", "Test\n"]
+    blob.name = "Horror.txt"
+    b = Backend(storage_client)
+    genres = b.get_genres("Test")
+    bucket.list_blobs.assert_called_once()
+    assert len(genres) == 1
+    assert genres[0] == "Horror"
+
+# Test for backend get_genres method when the blob does not contain the filename
+def test_get_genres_missing(file_stream, blob, bucket, storage_client):
+    file_stream.readlines.return_value = ["Wrong\n", "Name\n", "Bad_Test\n"]
+    blob.name = "Horror.txt"
+    b = Backend(storage_client)
+    genres = b.get_genres("Test")
+    bucket.list_blobs.assert_called_once()
+    assert len(genres) == 0
+
+def test_get_genres_no_blob(file_stream, blob, bucket, storage_client):
+    bucket.list_blobs.return_value = []
+    b = Backend(storage_client)
+    genres = b.get_genres("Test")
+    bucket.list_blobs.assert_called_once()
+    assert len(genres) == 0
 
 # Test for backend get_image method
 def test_get_image(file_stream, blob, bucket, storage_client):
