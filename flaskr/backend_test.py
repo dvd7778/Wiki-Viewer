@@ -210,9 +210,9 @@ def test_get_user_info(storage_client, blob, bucket, user_name, user_password,
     b = Backend(storage_client)
     output = b.get_user_info(user_name)
     bucket.blob.assert_called_with(user_name + ".txt")
-    assert json_output["first_name"] == output["Firstname"]
-    assert json_output["last_name"] == output["Secondname"]
-    assert output == {"Firstname": "Barsha", "Secondname": "Chaudhary", 'email':  'barsha@gmail.com' }
+    assert json_output["first_name"] == output["first_name"]
+    assert json_output["last_name"] == output["last_name"]
+    assert output == {"first_name": "Barsha", "last_name": "Chaudhary", 'email':  'barsha@gmail.com' }
 
 #testing if get_profile_img can get image from the userProfile bucket for the user if exists
 def test_get_profile_img(file_stream, blob, bucket, storage_client):
