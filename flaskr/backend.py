@@ -2,8 +2,11 @@
 from google.cloud import storage
 import hashlib
 from io import BytesIO
-from flaskr import pages
+#from flaskr import pages 
 import json
+import secrets 
+import os
+import difflib
 
 
 # Class for backend objects.
@@ -13,7 +16,8 @@ class Backend:
         self.storage_client = storage_client
         self.content_bucket = storage_client.bucket('wiki_content')
         self.userInfo_bucket = storage_client.bucket('users-passwords')
-        self.genres_bucket = storage_client.bucket('show-genres')
+        self.userProfile_bucket = storage_client.bucket('user-profile-pictures-wiki')
+        self.show_genre_bucket = storage_client.bucket('show-genres')
         self.page_names = []
 
     # Gets an uploaded page from the content bucket.
@@ -110,8 +114,9 @@ class Backend:
         blob = self.userInfo_bucket.blob(filename)
         stored_info = blob.download_as_text()
         info = json.loads(stored_info)
-        information["Firstname"] = info["first_name"]
-        information["Secondname"] = info["last_name"]
+        information["first_name"] = info["first_name"]
+        information["last_name"] = info["last_name"]
+        information["email"] = info["username"]
         return information
 
     # Gets an image from the content bucket.
@@ -119,6 +124,82 @@ class Backend:
         blob = self.content_bucket.get_blob(image_file)
         with blob.open('rb') as f:
             return BytesIO(f.read())
+
+    # Gets an image from the userProfile bucket
+    def get_profile_img(self, image_file):
+        blob = self.userProfile_bucket.get_blob(image_file)
+        with blob.open('rb') as f:
+            return BytesIO(f.read())
+
+    # Gets image url for a image from the userprofile bucket
+    # returns None if user has not uploaded any profile picture.
+    def get_image_url(self, user_name):
+        blobs = list(self.userProfile_bucket.list_blobs(prefix=user_name))
+        for blob in blobs:
+            if os.path.splitext(blob.name)[0] == user_name:
+                return f"/get_profile_img/{blob.name}"
+        return None
+
+    # Adds profile picture to the profileImage bucket.
+    def upload_profile(self, filename, data, user_name):
+        blobs = list(self.userProfile_bucket.list_blobs(prefix=user_name))
+        if blobs:
+            for blob in blobs:
+                if os.path.splitext(blob.name)[0] == user_name:
+                    filename_to_remove = user_name + os.path.splitext(blob.name)[-1]
+                    blob_to_remove = self.userProfile_bucket.blob(filename_to_remove)
+                    blob_to_remove.delete()
+        file_info = filename.split('.')
+        filename = f"{user_name}.{file_info[-1]}"
+        blob = self.userProfile_bucket.blob(filename)
+        with blob.open('wb') as f:
+            f.write(data)
+
+    # Gets the corresponding titles from a title search.
+    def title_search(self, query):  
+        shows = self.get_all_page_names()
+        matches = difflib.get_close_matches(str(query), shows, n=5, cutoff=0.5)
+        if not matches:
+            return "No title matches found for " + "'" + str(query) + "'"
+        return matches
+
+    # Gets the corresponding titles from a genre search.
+    def genre_search(self, query):  
+        # Checks correct type
+        if not isinstance(query, str):
+            return 'No genre matches found for ' + "'" + str(query) + "'"
+        matches = set()
+        queries = query.split(',')
+        genres = [
+            'action', 'adventure', 'animation', 'thriller', 'comedy', 'drama',
+            'romance', 'science fiction', 'fantasy'
+        ]
+        bad_queries = [] # Any queries that don't match a genre
+        for genre in queries:
+            if genre.strip().lower() not in genres:
+                bad_queries.append(genre)
+        # Checks if all queries are bad
+        if len(bad_queries) == len(queries):
+            return 'No genre matches found for ' + "'" + query + "'"
+        # Removes any bad queries
+        for query in queries:
+            if query in bad_queries:
+                queries.remove(query)
+    
+        for genre in queries:
+            blob = self.show_genre_bucket.blob(genre.strip().capitalize() +
+                                               '.txt')
+            f = blob.open()
+            content = f.readlines()
+            for show in content:
+                matches.add(show.strip())
+        # Checks if there are no matches
+        if not matches:
+            return 'No shows for ' + "'" + query + "'" + ' yet'
+        return matches
+
+
+
 
     #check if user is registered
     def check_if_registered(self,user):
@@ -143,6 +224,4 @@ class Backend:
             return True
         else:
             return False
-
-
 

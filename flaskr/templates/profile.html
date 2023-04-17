@@ -3,16 +3,56 @@
 {% block content %}
 
 <h1> Customize Your Profile Here </h1>
+{% if current_user.is_authenticated %}
+
+<style>
+    .rounded_img {
+      border: 2px solid rgb(32, 31, 31);
+      border-radius: 50%;
+    }
+
+    .box {
+      width:450px;
+      padding-top:5px;
+      border-style:solid;
+      border-color:#336699;
+      border-width:1px;
+      padding-left:3px;
+      padding-bottom:10px;
+      block-size: fit-content;
+      word-wrap: break-word;
+
+    }
+    </style>
+    <center>
+        <b><p class = "box">First Name: {{ current_user.name }} <br> </p>
+        <p class = "box">Last Name: {{ current_user.last_name }} <br> </p>
+        <p class = "box">Email: {{ current_user.email }} <br> </p></b>
+    </center>
 
 <div>
+    {% if not profile_picture %}
+    <img src= "/get_image/default.jpg" class="rounded_img" alt="Profile Picture" width="100" height="100"><br>
+    {% endif %}
+    {% if profile_picture %}
+    <img src= {{ profile_url }} class="rounded_img" alt="Profile Picture" width="200" height="200"><br>
+    {% endif %}
+</div> <br>
+<div>
     Upload Profile Picture
-</div>
-<br></br>
-<form action = "/upload" method = "POST" 
+</div><br>
+<form action = "/profile" method = "POST" 
          enctype = "multipart/form-data">
-         <input type = "file" name = "file" />
-         <input type = "submit"/>
-      </form>  
-
-
+         <input type = "file" name = "file" required/>
+         <input type = "submit" value = Upload>
+        </form>
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+          {% for message in messages %}
+              <p>{{message}}</p>
+          {% endfor %}
+      {% endif %}
+    {% endwith %}
+  
+{% endif %}
 {%endblock%}
