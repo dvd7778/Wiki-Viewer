@@ -4,6 +4,7 @@ from unittest.mock import patch
 from flask import request, render_template, redirect, url_for, flash, session
 import pytest
 from flask_wtf.csrf import generate_csrf
+from flaskr import pages
 
 
 # See https://flask.palletsprojects.com/en/2.2.x/testing/
@@ -37,7 +38,7 @@ def test_home_page(client):
 def test_upload_page(client):
     resp = client.get('/upload')
     assert resp.status_code == 200
-    assert b"Upload File to the Wiki" in resp.data
+    assert b"Upload Shows to the Wiki" in resp.data
     #Test for the feature1-adding genre clickable button
     assert b"Select at least one genre the show belong to:" in resp.data
 
@@ -117,3 +118,18 @@ def test_login_success(client):
     response = client.post('/login', follow_redirects=True)
     assert response.status_code == 200
     assert b'<p class="message">You have successfully logged in!</p>' in response.data
+
+
+
+# Tests the profile route.
+def test_profile_page(client):
+    resp = client.get('/profile')
+    assert resp.status_code == 200
+    assert b"Customize Your Profile Here" in resp.data
+
+
+# Tests the search route.
+def test_search_page(client):
+    resp = client.get('/search')
+    assert resp.status_code == 200
+    assert b"Search For Netflix Shows" in resp.data
