@@ -4,7 +4,7 @@ import unittest
 import json
 import pytest
 import hashlib
-
+import os
 
 #Testing for upload() and get_image()
 @pytest.fixture
@@ -210,9 +210,9 @@ def test_get_user_info(storage_client, blob, bucket, user_name, user_password,
     b = Backend(storage_client)
     output = b.get_user_info(user_name)
     bucket.blob.assert_called_with(user_name + ".txt")
-    assert json_output["first_name"] == output["Firstname"]
-    assert json_output["last_name"] == output["Secondname"]
-    assert output == {"Firstname": "Barsha", "Secondname": "Chaudhary"}
+    assert json_output["first_name"] == output["first_name"]
+    assert json_output["last_name"] == output["last_name"]
+    assert output == {"first_name": "Barsha", "last_name": "Chaudhary", 'email':  'barsha@gmail.com' }
     
 
 
@@ -276,7 +276,7 @@ def test_multiple_genre_search_success(file_stream, blob, bucket,
 
 
 # Test for wrong input type for backend genre_search method.
-def test_genre_search_fail1(file_stream, blob, bucket, storage_client):
+def test_genre_search_wrong_type(file_stream, blob, bucket, storage_client):
     file_stream.readlines.return_value = [
         'Arcane', 'Castlevania', 'Cyberpunk Edgerunners', 'Squid Game'
     ]
@@ -288,7 +288,7 @@ def test_genre_search_fail1(file_stream, blob, bucket, storage_client):
 
 
 # Test for invalid queries in backend genre_search method.
-def test_genre_search_fail2(file_stream, blob, bucket, storage_client):
+def test_genre_search_invalid_queries(file_stream, blob, bucket, storage_client):
     file_stream.readlines.return_value = [
         'Arcane', 'Castlevania', 'Cyberpunk Edgerunners', 'Squid Game'
     ]
@@ -300,7 +300,7 @@ def test_genre_search_fail2(file_stream, blob, bucket, storage_client):
 
 
 # Test for an existing genre, but no matching shows.
-def test_genre_search_fail3(file_stream, blob, bucket, storage_client):
+def test_genre_search_genre_without_shows(file_stream, blob, bucket, storage_client):
     file_stream.readlines.return_value = []
     blob.open.return_value = file_stream
     b = Backend(storage_client)
@@ -313,19 +313,83 @@ def test_genre_search_fail3(file_stream, blob, bucket, storage_client):
     assert text == "No shows for 'Romance' yet"
    
 
-#testing if the function is checking if the user is registered or not
-def test_check_if_registered(storage_client,blob,bucket,user_name):
-    with patch('google.cloud.storage.Blob') as storage_blob:
-        #case when user is registered
-        storage_blob.return_value.exists.return_value = True
-        b = Backend(storage_client)
-        output = b.check_if_registered(user_name)
-        assert output == True
+#testing if get_profile_img can get image from the userProfile bucket for the user if exists
+def test_get_profile_img(file_stream, blob, bucket, storage_client):
+    file_stream.read.return_value = b'Image data'
+    b = Backend(storage_client)
+    b.get_image('test.png')
+    bucket.get_blob.assert_called_with('test.png')
+    file_stream.read.assert_called_once()
 
-        #case when user is not registered
-        storage_blob.return_value.exists.return_value = False
-        b = Backend(storage_client)
-        output = b.check_if_registered(user_name)
-        assert output == False
+#fixture which can be used to get information for existing username 
+#for sign_up_test if user exists 
+@pytest.fixture
+def user_info1():
+    return {
+        "username": "barsha123@gmail.com",
+        "password": "pa$$word",
+        "first_name": "Barsha",
+        "last_name": "Chaudhary"
+    }
 
 
+#username from the json that is passed to the bucket
+@pytest.fixture
+#will be used in sign_up_test
+def user_name1(user_info):
+    return user_info["username"]
+
+#testing for user_profile does exist
+def test_get_image_url_exists(storage_client, blob, bucket, user_name,user_name1):
+    # Set up the mock objects
+    blob_names = [f"{user_name1}.png", f"{user_name}.jpg"]
+    blobs = [blob for blob_name in blob_names]
+    for i, blob in enumerate(blobs):
+        blob.name = blob_names[i]
+    bucket.list_blobs.return_value = blobs
+
+    # Call the method
+    b = Backend(storage_client)
+    result = b.get_image_url(user_name)
+    expected_result = f"/get_profile_img/{user_name}.jpg"
+    assert result == expected_result
+
+#testing for the user profile picture does not exist
+def test_get_image_url_not_exists(storage_client, blob, bucket, user_name):
+    blob_names = ["other_user.png", "other_user.jpg"]
+    blobs = [blob for blob_name in blob_names]
+    for i, blob in enumerate(blobs):
+        blob.name = blob_names[i]
+    bucket.list_blobs.return_value = blobs
+
+    # Call the method
+    b = Backend(storage_client)
+    result = b.get_image_url(user_name)
+    assert result is None
+
+#testing for upload/replace the profile picture 
+def test_upload_profile(file_stream, blob, bucket, storage_client, user_name):
+    # Set up the mock bucket to list blobs with other_user.png and other_user.jpg.
+    blob_names = ["other_user.png", "other_user.jpg"]
+    blobs = [blob for blob_name in blob_names]
+    for i, blob in enumerate(blobs):
+        blob.name = blob_names[i]
+    bucket.list_blobs.return_value = blobs
+
+    # Call the method being tested.
+    b = Backend(storage_client)
+    b.upload_profile('test.png', 'file data', user_name)
+
+    # Check that the previous profile picture (if it exists) was deleted.
+    for blob in blobs:
+        if os.path.splitext(blob.name)[0] == user_name:
+            filename_to_remove = user_name + os.path.splitext(blob.name)[-1]
+            blob_to_remove = bucket.blob(filename_to_remove)
+            blob_to_remove.delete.assert_called_once()
+
+    # Check that a new profile picture was uploaded.
+    filename = f"{user_name}.png"
+    bucket.blob.assert_called_with(filename)
+    blob = bucket.blob.return_value
+    blob.open.assert_called_once_with('wb')
+    file_stream.write.assert_called_once_with('file data')

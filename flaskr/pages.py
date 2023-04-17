@@ -1,20 +1,16 @@
-from flask import render_template, redirect, url_for, flash, send_file
-from flask import request
+from flask import render_template, redirect, url_for, flash, send_file, request
 from flask_login import login_user, current_user, logout_user, login_required
 from flaskr.backend import Backend
-from flaskr.forms import RegisterForm, LoginForm
 from flaskr.forms import RegisterForm, LoginForm, ResetPasswordForm, RequestResetForm
 import hashlib
-import re
 from flaskr.models import User
+import re
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer
 from itsdangerous import URLSafeTimedSerializer as Serializer
-from flask import render_template_string
-from flask_mail import Message
 from flask import render_template_string, url_for
-from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer
+
 def make_endpoints(app, login_manager,mail):
     b = Backend()
     # Flask uses the "app.route" decorator to call methods when users
@@ -58,7 +54,13 @@ def make_endpoints(app, login_manager,mail):
     # Route used to get an image
     @app.route('/get_image/<filename>')
     def retreive_image(filename):
-        return send_file(b.get_image(filename), mimetype='image/jpeg')
+        return send_file(b.get_image(filename), mimetype='image/jpg')
+    
+   # Route used to get an image
+    @app.route('/get_profile_img/<filename>')
+    def retreive_profile_image(filename):
+        return send_file(b.get_profile_img(filename), mimetype='image/jpg')
+    
 
     """
     This is the route for the registration page
@@ -121,10 +123,48 @@ def make_endpoints(app, login_manager,mail):
                                title='Login',
                                form=form,
                                error=error)
-
+    #This is profile route where user can change their profile     
+    @login_required
     @app.route("/profile", methods=["GET", "POST"])
     def profile():
-        return render_template('profile.html', title="Profile")
+        #check if user is authenticated
+        if current_user.is_authenticated:
+            #get username for current_user
+            username = current_user.username
+            #handle get request for the route
+            if request.method == 'GET':
+                #get profile img url 
+                output = b.get_image_url(username)
+                #if profile picture exists, render the profile page with profile picture
+                if output:
+                    return render_template('profile.html', profile_url=output, profile_picture=True)
+                #if url does not exist, show default image as profile picture
+                else:
+                    flash('You need to upload your profile picture!')
+                    return render_template('profile.html', title="Profile", profile_picture=False)
+            
+            #handle post request for the route
+            if request.method == 'POST':
+                #get the uploaded file from the request object
+                try:
+                    f = request.files['file']
+                    #check if file was selected
+                    if not f.filename:
+                        flash('No file selected')
+                        return redirect(url_for('profile'))
+                    #upload file to the database (bucket)
+                    b.upload_profile(f.filename, f.stream.read(), username)
+                    flash("Profile Picture Changed!")
+                except Exception as e:
+                    flash(f"Upload failed: {e}")
+                
+                #redirect the user back to the profile page
+                return redirect(url_for('profile'))
+           
+        #if not authenticated return user to the login 
+        else:
+            return redirect(url_for('login'))
+
 
     @app.route("/search", methods=["GET", "POST"])
     def search():
@@ -152,8 +192,12 @@ def make_endpoints(app, login_manager,mail):
     def load_user(user_id):
         user = User(user_id)
         info = b.get_user_info(user_id)
-        first_name = info["Firstname"]
+        first_name = info["first_name"]
+        last_name = info["last_name"]
+        email = info["email"]
         user.set_name(first_name)
+        user.set_last_name(last_name)
+        user.set_email(email)
         login_user(user)
         return user
 
@@ -178,74 +222,4 @@ def make_endpoints(app, login_manager,mail):
             b.upload(f.filename, f.stream.read())
             return 'file uploaded successfully'
 
-    # regular expression to check for a valid email address
-    email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-    def send_reset_email(user):
-        # check if user is a valid email address
-        email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-
-        if not re.match(email_regex, user):
-            raise ValueError('Invalid email address')
-
-        s = URLSafeTimedSerializer(app.config['SECRET_KEY'], salt='reset-password')
-        token = s.dumps({'user': user})
-        print("TOKEN FOR S", token)
-        msg = Message('Password Reset Request', sender='noreply@demo.com', recipients=[user])
-        msg.body = f'''To reset your password visit the following link: 
-            {url_for('reset_token', token=token, _external=True)}
-
-            If you did not send the request to change your password, simply ignore this email.
-            '''
-        mail.send(msg)
-
-    @app.route('/reset_password',methods = ['POST', 'GET'])
-    def reset_request():
-        if current_user.is_authenticated:
-            return redirect(url_for('home'))
-        error = None
-        form = RequestResetForm()
-        if form.validate_on_submit() and request.method == "POST":
-            user = form.email.data.lower()
-            check_if_correct = b.check_if_registered(user)
-            if check_if_correct:
-                send_reset_email(user)
-                flash('Password reset link sent to your email!')
-                return redirect(url_for('login'))
-            else:
-                error = 'Your email is not registered'
-                return render_template('reset_request.html',title = 'Reset Password', form = form, error = error )      
-        return render_template('reset_request.html',title = 'Reset Password',form = form)
-
-    @app.route('/reset_password/<token>', methods=['GET', 'POST'])
-    def reset_token(token):
-        # Verify the token
-        s = URLSafeTimedSerializer(app.config['SECRET_KEY'], salt='reset-password')
-        try:
-            data = s.loads(token, max_age=86400)
-        except:
-            flash('The password reset link is invalid or has expired.')
-            return redirect(url_for('reset_request'))
-
-        # Get the user from the token        
-        user = data['user']
-        # Initialize the reset password form
-        form = ResetPasswordForm()
-        print("Forms on submit",form.validate_on_submit())
-        # Handle form submission
-        if form.validate_on_submit() and request.method == 'POST':
-            password = form.password.data
-            print("actual password",password)
-            check_if_reset = b.reset_password(user, password)
-            print("Check if password correct", check_if_reset)
-            if check_if_reset:
-                # Redirect to the login page
-                flash('Your password has been reset successfully. You can now log in.', 'success')
-                return redirect(url_for('login'))
-                # Send confirmation email
-                msg = Message('Your password has been reset', sender='noreply@demo.com', recipients=[user])
-                msg.body = f'''Your password for the WikiViewer has been reset successfully.'''
-                mail.send(msg)
-                
-            else:
-                flash('Password Reset Fails')
-        return render_template('reset_token.html', title='Reset Password', form=form)
+   

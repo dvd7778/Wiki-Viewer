@@ -38,3 +38,16 @@ class User(UserMixin):
 
     def get_name(self):
         return self.username
+
+    def set_last_name(self,last_name):
+        self.last_name = last_name
+    
+    def get_last_name(self,last_name):
+        return self.last_name
+    
+    def set_email(self,email):
+        self.email = email
+    
+    def get_email(self,email):
+        return self.email
+
