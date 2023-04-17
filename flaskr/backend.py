@@ -119,7 +119,6 @@ class Backend:
             data = json.loads(stored_info)
             data["password"] = entered_password
             blob.upload_from_string(json.dumps(data))
-            # return True
         else:
             return False
     

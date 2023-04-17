@@ -13,8 +13,6 @@ from itsdangerous import URLSafeTimedSerializer as Serializer
 from flask import render_template_string
 from flask_mail import Message
 from flask import render_template_string, url_for
-from flask_mail import Message
-from itsdangerous import URLSafeTimedSerializer
 def make_endpoints(app, login_manager,mail):
     b = Backend()
     # Flask uses the "app.route" decorator to call methods when users
@@ -163,8 +161,7 @@ def make_endpoints(app, login_manager,mail):
             b.upload(f.filename, f.stream.read())
             return 'file uploaded successfully'
 
-    # regular expression to check for a valid email address
-    email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    # Route for sending email with link to reset password
     def send_reset_email(user):
         # check if user is a valid email address
         email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
@@ -182,6 +179,7 @@ def make_endpoints(app, login_manager,mail):
             '''
         mail.send(msg)
 
+    #Route for resetting user password via email
     @app.route('/reset_password',methods = ['POST', 'GET'])
     def reset_request():
         if current_user.is_authenticated:
@@ -199,7 +197,8 @@ def make_endpoints(app, login_manager,mail):
                 error = 'Your email is not registered'
                 return render_template('reset_request.html',title = 'Reset Password', form = form, error = error )      
         return render_template('reset_request.html',title = 'Reset Password',form = form)
-
+    
+    #Route that links to page of reset password and send reset email confirmation  
     @app.route('/reset_password/<token>', methods=['GET', 'POST'])
     def reset_token(token):
         # Verify the token
