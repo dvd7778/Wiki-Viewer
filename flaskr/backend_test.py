@@ -214,6 +214,7 @@ def test_get_user_info(storage_client, blob, bucket, user_name, user_password,
     assert json_output["last_name"] == output["Secondname"]
     assert output == {"Firstname": "Barsha", "Secondname": "Chaudhary", 'email':  'barsha@gmail.com' }
 
+#testing if get_profile_img can get image from the userProfile bucket for the user if exists
 def test_get_profile_img(file_stream, blob, bucket, storage_client):
     file_stream.read.return_value = b'Image data'
     b = Backend(storage_client)
@@ -221,6 +222,8 @@ def test_get_profile_img(file_stream, blob, bucket, storage_client):
     bucket.get_blob.assert_called_with('test.png')
     file_stream.read.assert_called_once()
 
+#fixture which can be used to get information for existing username 
+#for sign_up_test if user exists 
 @pytest.fixture
 def user_info1():
     return {

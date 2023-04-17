@@ -127,30 +127,41 @@ def make_endpoints(app, login_manager,mail):
     @login_required
     @app.route("/profile", methods = ["GET", "POST"])
     def profile():
+        #check if user is authenticated
         if current_user.is_authenticated:
+            #get username for current_user
             username = current_user.username
+            #handle get request for the route
             if request.method == 'GET':
+                #get profile img url 
                 output = b.get_image_url(username)
+                #if profile picture exists, render the profile page with profile picture
                 if output:
                     return render_template('profile.html', profile_url=output, profile_picture=True)
+                #if url does not exist, show default image as profile picture
                 else:
                     flash('You need to upload your profile picture!')
                     return render_template('profile.html', title="Profile", profile_picture=False)
             
+            #handle post request for the route
             if request.method == 'POST':
+                #get the uploaded file from the request object
                 try:
                     f = request.files['file']
+                    #check if file was selected
                     if not f.filename:
                         flash('No file selected')
                         return redirect(url_for('profile'))
+                    #upload file to the database (bucket)
                     b.upload_profile(f.filename, f.stream.read(), username)
                     flash("Profile Picture Changed!")
                 except Exception as e:
                     flash(f"Upload failed: {e}")
                 
+                #redirect the user back to the profile page
                 return redirect(url_for('profile'))
-            
-            return render_template('profile.html', title="Profile", profile_picture=False)
+           
+        #if not authenticated return user to the login 
         else:
             return redirect(url_for('login'))
 
@@ -165,8 +176,8 @@ def make_endpoints(app, login_manager,mail):
     def load_user(user_id):
         user = User(user_id)
         info = b.get_user_info(user_id)
-        first_name = info["Firstname"]
-        last_name = info["Secondname"]
+        first_name = info["first_name"]
+        last_name = info["last_name"]
         email = info["email"]
         user.set_name(first_name)
         user.set_last_name(last_name)

@@ -89,8 +89,8 @@ class Backend:
         blob = self.userInfo_bucket.blob(filename)
         stored_info = blob.download_as_text()
         info = json.loads(stored_info)
-        information["Firstname"] = info["first_name"]
-        information["Secondname"] = info["last_name"]
+        information["first_name"] = info["first_name"]
+        information["last_name"] = info["last_name"]
         information["email"] = info["username"]
         return information
 
