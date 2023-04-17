@@ -6,6 +6,8 @@ import pytest
 from flask_wtf.csrf import generate_csrf
 from io import BytesIO
 from flaskr.models import User
+from flaskr import pages
+
 
 # See https://flask.palletsprojects.com/en/2.2.x/testing/
 # for more info on testing
@@ -38,7 +40,7 @@ def test_home_page(client):
 def test_upload_page(client):
     resp = client.get('/upload')
     assert resp.status_code == 200
-    assert b"Upload File to the Wiki" in resp.data
+    assert b"Upload Shows to the Wiki" in resp.data
     #Test for the feature1-adding genre clickable button
     assert b"Select at least one genre the show belong to:" in resp.data
 
@@ -192,8 +194,8 @@ def test_profile_logged_in_POST_request(client):
                 assert b'test_img/Barsha.jpg' in resp.data
                 mock_upload.assert_called_once_with(filename, file_stream, user.username)
 
-
-
-
-
-
+# Tests the search route.
+def test_search_page(client):
+    resp = client.get('/search')
+    assert resp.status_code == 200
+    assert b"Search For Netflix Shows" in resp.data

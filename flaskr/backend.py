@@ -2,10 +2,12 @@
 from google.cloud import storage
 import hashlib
 from io import BytesIO
-from flaskr import pages
+#from flaskr import pages 
 import json
 import secrets 
 import os
+import difflib
+
 
 # Class for backend objects.
 class Backend:
@@ -15,6 +17,7 @@ class Backend:
         self.content_bucket = storage_client.bucket('wiki_content')
         self.userInfo_bucket = storage_client.bucket('users-passwords')
         self.userProfile_bucket = storage_client.bucket('user-profile-pictures-wiki')
+        self.show_genre_bucket = storage_client.bucket('show-genres')
         self.page_names = []
 
     # Gets an uploaded page from the content bucket.
@@ -129,4 +132,74 @@ class Backend:
         blob = self.userProfile_bucket.blob(filename)
         with blob.open('wb') as f:
             f.write(data)
+
+    # Gets the corresponding titles from a title search.
+    def title_search(self, query):  
+        shows = self.get_all_page_names()
+        matches = difflib.get_close_matches(str(query), shows, n=5, cutoff=0.5)
+        if not matches:
+            return "No title matches found for " + "'" + str(query) + "'"
+        return matches
+
+    # Gets the corresponding titles from a genre search.
+    def genre_search(self, query):  
+        # Checks correct type
+        if not isinstance(query, str):
+            return 'No genre matches found for ' + "'" + str(query) + "'"
+        matches = set()
+        queries = query.split(',')
+        genres = [
+            'action', 'adventure', 'animation', 'thriller', 'comedy', 'drama',
+            'romance', 'science fiction', 'fantasy'
+        ]
+        bad_queries = [] # Any queries that don't match a genre
+        for genre in queries:
+            if genre.strip().lower() not in genres:
+                bad_queries.append(genre)
+        # Checks if all queries are bad
+        if len(bad_queries) == len(queries):
+            return 'No genre matches found for ' + "'" + query + "'"
+        # Removes any bad queries
+        for query in queries:
+            if query in bad_queries:
+                queries.remove(query)
+    
+        for genre in queries:
+            blob = self.show_genre_bucket.blob(genre.strip().capitalize() +
+                                               '.txt')
+            f = blob.open()
+            content = f.readlines()
+            for show in content:
+                matches.add(show.strip())
+        # Checks if there are no matches
+        if not matches:
+            return 'No shows for ' + "'" + query + "'" + ' yet'
+        return matches
+
+
+
+
+    #check if user is registered
+    def check_if_registered(self,user):
+        filename = user + ".txt"
+        stats = storage.Blob(bucket = self.userInfo_bucket, name = filename).exists(self.storage_client)
+        if stats:
+            return True
+        else:
+            return False
+            
+    #reset password for the user through forget password feature
+    def reset_password(self,username,password):
+        filename = username + ".txt"
+        blob = self.userInfo_bucket.blob(filename)
+        stats = storage.Blob(bucket = self.userInfo_bucket, name = filename).exists(self.storage_client)
+        if stats:
+            entered_password = self.hash_password(password)
+            stored_info = blob.download_as_text()
+            data = json.loads(stored_info)
+            data["password"] = entered_password
+            blob.upload_from_string(json.dumps(data))
+            return True
+        else:
+            return False
 

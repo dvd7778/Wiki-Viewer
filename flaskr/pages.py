@@ -123,9 +123,9 @@ def make_endpoints(app, login_manager,mail):
                                title='Login',
                                form=form,
                                error=error)
-
+    #This is profile route where user can change their profile     
     @login_required
-    @app.route("/profile", methods = ["GET", "POST"])
+    @app.route("/profile", methods=["GET", "POST"])
     def profile():
         #check if user is authenticated
         if current_user.is_authenticated:
@@ -166,10 +166,23 @@ def make_endpoints(app, login_manager,mail):
             return redirect(url_for('login'))
 
 
-    @app.route("/search", methods = ["GET", "POST"])
+    @app.route("/search", methods=["GET", "POST"])
     def search():
-        return render_template('search.html', title="Search")
+        # Do stuff here for the data
+        if request.method == "POST":
+            radio = request.form["choice"]
+            query = request.form["search"]
+            if radio == "Title":
+                title_matches = b.title_search(query)
 
+            elif radio == "Genre":
+                title_matches = b.genre_search(query)
+            # Have to make search_results html
+            return render_template('search_results.html',
+                                   title="Search",
+                                   results=title_matches)
+        else:
+            return render_template('search.html', title="Search")
 
     # Logins the user to the Flask
     @login_manager.user_loader
