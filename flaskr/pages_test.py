@@ -4,6 +4,8 @@ from unittest.mock import patch
 from flask import request, render_template, redirect, url_for, flash, session
 import pytest
 from flask_wtf.csrf import generate_csrf
+from io import BytesIO
+from flaskr.models import User
 from flaskr import pages
 
 
@@ -119,14 +121,78 @@ def test_login_success(client):
     assert response.status_code == 200
     assert b'<p class="message">You have successfully logged in!</p>' in response.data
 
-
-
-# Tests the profile route.
-def test_profile_page(client):
-    resp = client.get('/profile')
+#testing for route to get image for profile
+def test_get_profile_img(client):
+    image_data = b'sample image data'
+    with patch('flaskr.backend.Backend.get_profile_img', return_value=BytesIO(image_data)):
+        resp = client.get('/get_profile_img/sample.jpg')
     assert resp.status_code == 200
-    assert b"Customize Your Profile Here" in resp.data
+    assert resp.mimetype == 'image/jpg'
+    assert resp.data == image_data
 
+#test for profile route when user is not logged in
+def test_profile_not_logged_in(client):
+    # Test POST when the user is not authenticated 
+    resp = client.post('/profile', follow_redirects=True)
+    assert resp.status_code == 200
+    assert b'Login to Wiki' in resp.data
+
+
+#set up for the logged in user for test_profile
+def test_profile_logged_in(client):
+    with patch('flask_login.utils._get_user') as mock_cc:
+        with patch('flaskr.backend.Backend.get_image_url') as mock_url:
+            user = User('Barsha')
+            mock_cc.return_value = user
+            mock_url.return_value = 'test_img/Barsha.jpg'
+            resp = client.post('/profile', follow_redirects=True)
+            assert resp.status_code == 200
+            assert b'Customize Your Profile Here' in resp.data
+
+#testing for the get request for the profile route when user is logged in
+def test_profile_logged_in_GET_request(client):
+    with patch('flask_login.utils._get_user') as mock_cc:
+        with patch('flaskr.backend.Backend.get_image_url') as mock_url:
+            # create a user object and set it as the current user
+            user = User('Barsha')
+            mock_cc.return_value = user
+            
+            # set the mock URL for the user's profile picture
+            mock_url.return_value = 'test_img/Barsha.jpg'
+            
+            # make a GET request to the profile route
+            resp = client.get('/profile')
+
+            # check that the response status code is 200
+            assert resp.status_code == 200
+            
+            #check if profile route  
+            assert b'Customize Your Profile Here' in resp.data
+            
+            # check that the user's profile picture URL is in the response data
+            assert b'test_img/Barsha.jpg' in resp.data
+
+#testing for the post request for the profile route when user is logged in
+def test_profile_logged_in_POST_request(client):
+    with patch('flask_login.utils._get_user') as mock_cc:
+        with patch('flaskr.backend.Backend.get_image_url') as mock_url:
+            with patch('flaskr.backend.Backend.upload_profile') as mock_upload:
+                # create a user object and set it as the current user
+                user = User('Barsha')
+                mock_cc.return_value = user
+
+                # set the mock URL ans set return values for the user's profile picture
+                mock_url.return_value = 'test_img/Barsha.jpg'
+                filename = 'test_img/Barsha.jpg'
+                file_stream = b'1234'
+                mock_upload.return_value = True
+
+                #make a post request to the profile route with file data
+                resp = client.post('/profile', data={'file': (BytesIO(file_stream), filename)}, follow_redirects=True)
+                assert resp.status_code == 200
+                assert b'Profile Picture Changed!' in resp.data
+                assert b'test_img/Barsha.jpg' in resp.data
+                mock_upload.assert_called_once_with(filename, file_stream, user.username)
 
 # Tests the search route.
 def test_search_page(client):

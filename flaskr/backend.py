@@ -4,8 +4,9 @@ import hashlib
 from io import BytesIO
 #from flaskr import pages 
 import json
-import difflib
+import secrets 
 import os
+import difflib
 
 
 # Class for backend objects.
@@ -15,6 +16,7 @@ class Backend:
         self.storage_client = storage_client
         self.content_bucket = storage_client.bucket('wiki_content')
         self.userInfo_bucket = storage_client.bucket('users-passwords')
+        self.userProfile_bucket = storage_client.bucket('user-profile-pictures-wiki')
         self.show_genre_bucket = storage_client.bucket('show-genres')
         self.page_names = []
 
@@ -90,8 +92,9 @@ class Backend:
         blob = self.userInfo_bucket.blob(filename)
         stored_info = blob.download_as_text()
         info = json.loads(stored_info)
-        information["Firstname"] = info["first_name"]
-        information["Secondname"] = info["last_name"]
+        information["first_name"] = info["first_name"]
+        information["last_name"] = info["last_name"]
+        information["email"] = info["username"]
         return information
 
     # Gets an image from the content bucket.
@@ -99,6 +102,36 @@ class Backend:
         blob = self.content_bucket.get_blob(image_file)
         with blob.open('rb') as f:
             return BytesIO(f.read())
+
+    # Gets an image from the userProfile bucket
+    def get_profile_img(self, image_file):
+        blob = self.userProfile_bucket.get_blob(image_file)
+        with blob.open('rb') as f:
+            return BytesIO(f.read())
+
+    # Gets image url for a image from the userprofile bucket
+    # returns None if user has not uploaded any profile picture.
+    def get_image_url(self, user_name):
+        blobs = list(self.userProfile_bucket.list_blobs(prefix=user_name))
+        for blob in blobs:
+            if os.path.splitext(blob.name)[0] == user_name:
+                return f"/get_profile_img/{blob.name}"
+        return None
+
+    # Adds profile picture to the profileImage bucket.
+    def upload_profile(self, filename, data, user_name):
+        blobs = list(self.userProfile_bucket.list_blobs(prefix=user_name))
+        if blobs:
+            for blob in blobs:
+                if os.path.splitext(blob.name)[0] == user_name:
+                    filename_to_remove = user_name + os.path.splitext(blob.name)[-1]
+                    blob_to_remove = self.userProfile_bucket.blob(filename_to_remove)
+                    blob_to_remove.delete()
+        file_info = filename.split('.')
+        filename = f"{user_name}.{file_info[-1]}"
+        blob = self.userProfile_bucket.blob(filename)
+        with blob.open('wb') as f:
+            f.write(data)
 
     # Gets the corresponding titles from a title search.
     def title_search(self, query):  
