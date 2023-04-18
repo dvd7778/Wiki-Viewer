@@ -210,18 +210,15 @@ def test_reset_token_expired(mock_form, client):
 
                     # Make a GET request to the reset password page with the token
                     response = client.get(f'/reset_password/{token}')
-
                     # Assert that the response status code is 302 (redirects to reset_request)
                     assert response.status_code == 302
-                    # Check that the reset password form is in the response
-                    # assert b'You should be redirected automatically to the target URL' in response.data
 
                     # # Make a POST request to the reset password page with a new password
-                    # response = client.post('/reset_password/{token}', data={'password': 'newpassword', 'confirm_password': 'newpassword'}, follow_redirects = True)
+                    response = client.post('/reset_password/{token}', data={'password': 'newpassword', 'confirm_password': 'newpassword'}, follow_redirects = True)
 
-                    # assert b'The password reset link is invalid or has expired' in response.data
-                    # # Assert that the response status code is 200 
-                    # assert response.status_code == 200
+                    assert b'The password reset link is invalid or has expired' in response.data
+                    # Assert that the response status code is 200 
+                    assert response.status_code == 200
             
 #testing pages for login success
 def test_login_success(client):
