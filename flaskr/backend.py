@@ -2,8 +2,10 @@
 from google.cloud import storage
 import hashlib
 from io import BytesIO
-#from flaskr import pages 
 import json
+from flask_mail import Message
+from itsdangerous import URLSafeTimedSerializer
+import re
 import secrets 
 import os
 import difflib
@@ -221,7 +223,8 @@ class Backend:
             data = json.loads(stored_info)
             data["password"] = entered_password
             blob.upload_from_string(json.dumps(data))
-            return True
         else:
             return False
+    
+    
 

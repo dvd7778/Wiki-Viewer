@@ -115,7 +115,7 @@ def make_endpoints(app, login_manager,mail):
                 user = User(username)
                 userInfo = user.get_id()
                 info = b.get_user_info(userInfo)
-                first_name = info["Firstname"]
+                first_name = info["first_name"]
                 user.set_name(first_name)
                 login_user(user)
                 return render_template('main.html',
@@ -224,12 +224,10 @@ def make_endpoints(app, login_manager,mail):
         if request.method == 'POST':
             checkbox_names = ['genre_act', 'genre_adv', 'genre_anim', 'genre_com', 'genre_fant', 'genre_rom', 'genre_hor', 'genre_thr', 'genre_scifi', 'genre_drama']
             checked_genres = []
-
             for genre in checkbox_names: # stores all of the selected genres in the checked_genres list
                 checked = request.form.get(genre)
                 if checked:
                     checked_genres.append(checked)
-
             if not checked_genres:
                 # There is an error because there was no genre selected when there should have
                 return render_template('upload.html', error="No genres were selected. Please select at least one genre.")
@@ -238,4 +236,67 @@ def make_endpoints(app, login_manager,mail):
             b.upload(f.filename, f.stream.read()) # uploads the selected file
             return 'file uploaded successfully'
 
-   
+    # Route for sending email with link to reset password
+    def send_reset_email(user):
+        # check if user is a valid email address
+        email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'         
+        s = URLSafeTimedSerializer(app.config['SECRET_KEY'], salt='reset-password')
+        token = s.dumps({'user': user})
+        msg = Message('Password Reset Request', sender='noreply@demo.com', recipients=[user])
+        msg.body = f'''To reset your password visit the following link: 
+            {url_for('reset_token', token=token, _external=True)}
+
+            If you did not send the request to change your password, simply ignore this email.
+            '''
+        mail.send(msg)
+
+    #Route for resetting user password via email
+    @app.route('/reset_password',methods = ['POST', 'GET'])
+    def reset_request():
+        if current_user.is_authenticated:
+            return redirect(url_for('home'))
+        error = None
+        form = RequestResetForm()
+        if form.validate_on_submit() and request.method == "POST":
+            user = form.email.data.lower()
+            check_if_correct = b.check_if_registered(user)
+            if check_if_correct:
+                send_reset_email(user)
+                flash('Password reset link sent to your email!')
+                return redirect(url_for('login'))
+            else:
+                error = 'Your email is not registered'
+                return render_template('reset_request.html',title = 'Reset Password', form = form, error = error )      
+        return render_template('reset_request.html',title = 'Reset Password',form = form)
+    
+    #Route that links to page of reset password and send reset email confirmation  
+    @app.route('/reset_password/<token>', methods=['GET', 'POST'])
+    def reset_token(token):
+        # Verify the token
+        s = URLSafeTimedSerializer(app.config['SECRET_KEY'], salt='reset-password')
+        try:
+            data = s.loads(token, max_age=86400)
+        except:
+            flash('The password reset link is invalid or has expired.')
+            return redirect(url_for('reset_request'))
+
+        # Get the user from the token        
+        user = data['user']
+        # Initialize the reset password form
+        form = ResetPasswordForm()
+        # Handle form submission
+        if form.validate_on_submit() and request.method == 'POST':
+            password = form.password.data
+            check_if_reset = b.reset_password(user, password)
+            if check_if_reset:
+                # Redirect to the login page
+                flash('Your password has been reset successfully. You can now log in.', 'success')
+                return redirect(url_for('login'))
+                # Send confirmation email
+                msg = Message('Your password has been reset', sender='noreply@demo.com', recipients=[user])
+                msg.body = f'''Your password for the WikiViewer has been reset successfully.'''
+                mail.send(msg)
+                
+            else:
+                flash('Password Reset Fails')
+        return render_template('reset_token.html', title='Reset Password', form=form)
