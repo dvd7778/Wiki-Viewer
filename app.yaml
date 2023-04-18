@@ -1,7 +1,5 @@
 runtime: python39
-
+DEPLOYED_SERVER_NAME: 'wiki-viewer-377817.uc.r.appspot.com'
 handlers: 
-  - url: /static
-    static_dir: static
   - url: /.*
     script: auto

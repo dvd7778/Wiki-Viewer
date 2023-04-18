@@ -2,11 +2,14 @@
 from google.cloud import storage
 import hashlib
 from io import BytesIO
-from flaskr import pages
 import json
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer
 import re
+import secrets 
+import os
+import difflib
+
 
 # Class for backend objects.
 class Backend:
@@ -15,6 +18,8 @@ class Backend:
         self.storage_client = storage_client
         self.content_bucket = storage_client.bucket('wiki_content')
         self.userInfo_bucket = storage_client.bucket('users-passwords')
+        self.userProfile_bucket = storage_client.bucket('user-profile-pictures-wiki')
+        self.show_genre_bucket = storage_client.bucket('show-genres')
         self.page_names = []
 
     # Gets an uploaded page from the content bucket.
@@ -39,11 +44,33 @@ class Backend:
                 self.page_names.append(blob.name[:-4])
         return self.page_names
 
-    # Adds data to the content bucket.
+    # Adds data to the content bucket, and uploads the selected genres to the genre bucket.
     def upload(self, filename, data):
-        blob = self.content_bucket.blob(filename)
-        with blob.open('wb') as f:
+        content_blob = self.content_bucket.blob(filename)
+        with content_blob.open('wb') as f:
             f.write(data)
+    
+    # Saves the filename in every genre text file of the selected genres.
+    def upload_genres(self, filename, genres):
+        for genre in genres:
+            genre_blob = self.show_genre_bucket.get_blob(genre + ".txt")
+            with genre_blob.open() as file:
+                text = file.readlines()
+                text.append(filename[:-4] + "\n")
+            with genre_blob.open('w') as file:
+                for i in range(len(text)):
+                    file.write(text[i])
+
+    # Stores the assigned genres of a show in a list and returns it.
+    def get_genres(self, filename):
+        genre_blobs = self.show_genre_bucket.list_blobs()
+        genres = []
+        for genre_blob in genre_blobs:
+            with genre_blob.open() as file:
+                shows = file.readlines()
+                if filename + "\n" in shows:
+                    genres.append(genre_blob.name[:-4])
+        return genres
 
     #It stores password inside the file which named after each username in the gcs bucket.
     def sign_up(self, username, password, first_name, last_name):
@@ -89,8 +116,9 @@ class Backend:
         blob = self.userInfo_bucket.blob(filename)
         stored_info = blob.download_as_text()
         info = json.loads(stored_info)
-        information["Firstname"] = info["first_name"]
-        information["Secondname"] = info["last_name"]
+        information["first_name"] = info["first_name"]
+        information["last_name"] = info["last_name"]
+        information["email"] = info["username"]
         return information
 
     # Gets an image from the content bucket.
@@ -98,6 +126,82 @@ class Backend:
         blob = self.content_bucket.get_blob(image_file)
         with blob.open('rb') as f:
             return BytesIO(f.read())
+
+    # Gets an image from the userProfile bucket
+    def get_profile_img(self, image_file):
+        blob = self.userProfile_bucket.get_blob(image_file)
+        with blob.open('rb') as f:
+            return BytesIO(f.read())
+
+    # Gets image url for a image from the userprofile bucket
+    # returns None if user has not uploaded any profile picture.
+    def get_image_url(self, user_name):
+        blobs = list(self.userProfile_bucket.list_blobs(prefix=user_name))
+        for blob in blobs:
+            if os.path.splitext(blob.name)[0] == user_name:
+                return f"/get_profile_img/{blob.name}"
+        return None
+
+    # Adds profile picture to the profileImage bucket.
+    def upload_profile(self, filename, data, user_name):
+        blobs = list(self.userProfile_bucket.list_blobs(prefix=user_name))
+        if blobs:
+            for blob in blobs:
+                if os.path.splitext(blob.name)[0] == user_name:
+                    filename_to_remove = user_name + os.path.splitext(blob.name)[-1]
+                    blob_to_remove = self.userProfile_bucket.blob(filename_to_remove)
+                    blob_to_remove.delete()
+        file_info = filename.split('.')
+        filename = f"{user_name}.{file_info[-1]}"
+        blob = self.userProfile_bucket.blob(filename)
+        with blob.open('wb') as f:
+            f.write(data)
+
+    # Gets the corresponding titles from a title search.
+    def title_search(self, query):  
+        shows = self.get_all_page_names()
+        matches = difflib.get_close_matches(str(query), shows, n=5, cutoff=0.5)
+        if not matches:
+            return "No title matches found for " + "'" + str(query) + "'"
+        return matches
+
+    # Gets the corresponding titles from a genre search.
+    def genre_search(self, query):  
+        # Checks correct type
+        if not isinstance(query, str):
+            return 'No genre matches found for ' + "'" + str(query) + "'"
+        matches = set()
+        queries = query.split(',')
+        genres = [
+            'action', 'adventure', 'animation', 'thriller', 'comedy', 'drama',
+            'romance', 'science fiction', 'fantasy'
+        ]
+        bad_queries = [] # Any queries that don't match a genre
+        for genre in queries:
+            if genre.strip().lower() not in genres:
+                bad_queries.append(genre)
+        # Checks if all queries are bad
+        if len(bad_queries) == len(queries):
+            return 'No genre matches found for ' + "'" + query + "'"
+        # Removes any bad queries
+        for query in queries:
+            if query in bad_queries:
+                queries.remove(query)
+    
+        for genre in queries:
+            blob = self.show_genre_bucket.blob(genre.strip().capitalize() +
+                                               '.txt')
+            f = blob.open()
+            content = f.readlines()
+            for show in content:
+                matches.add(show.strip())
+        # Checks if there are no matches
+        if not matches:
+            return 'No shows for ' + "'" + query + "'" + ' yet'
+        return matches
+
+
+
 
     #check if user is registered
     def check_if_registered(self,user):
@@ -123,22 +227,4 @@ class Backend:
             return False
     
     
-    # email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-    # def send_reset_email(self,user,config,mail):
-    #     # check if user is a valid email address
-    #     email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-
-    #     if not re.match(email_regex, user):
-    #         raise ValueError('Invalid email address')
-
-    #     s = URLSafeTimedSerializer(config['SECRET_KEY'], salt='reset-password')
-    #     token = s.dumps({'user': user})
-    #     msg = Message('Password Reset Request', sender='noreply@demo.com', recipients=[user])
-    #     msg.body = f'''To reset your password visit the following link: 
-    #         {url_for('reset_token', token=token, _external=True)}
-
-    #         If you did not send the request to change your password, simply ignore this email.
-    #         '''
-    #     mail.send(msg)
-
 
