@@ -128,7 +128,6 @@ def make_endpoints(app, login_manager,mail):
                                form=form,
                                error=error)
     #This is profile route where user can change their profile     
-    @login_required
     @app.route("/profile", methods=["GET", "POST"])
     def profile():
         #check if user is authenticated
