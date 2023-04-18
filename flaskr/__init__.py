@@ -22,9 +22,8 @@ def create_app(test_config=None):
     )
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'
     app.config['MAIL_PORT'] = 465
-    app.config['MAIL_USE_TLS'] = True
-    if os.environ.get('DEPLOYED_SERVER_NAME') ==  'wiki-viewer-377817.uc.r.appspot.com':
-        app.config['SERVER_NAME'] = 'wiki-viewer-377817.uc.r.appspot.com'
+    # app.config['MAIL_USE_TLS'] = True
+    #app.config['SERVER_NAME'] = 'wiki-viewer-377817.uc.r.appspot.com'
     app.config['MAIL_USE_TLS'] = False
     app.config['MAIL_USE_SSL'] = True
     app.config['PREFERRED_URL_SCHEME'] = 'https'
