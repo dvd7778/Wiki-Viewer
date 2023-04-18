@@ -214,7 +214,7 @@ def test_reset_token_expired(mock_form, client):
                     # Assert that the response status code is 302 (redirects to reset_request)
                     assert response.status_code == 302
                     # Check that the reset password form is in the response
-                    assert b'You should be redirected automatically to target URL: <a href="/reset_password">/reset_password</a>. If not click the link.' in response.data
+                    assert b'You should be redirected automatically to the target URL: <a href="/reset_password">/reset_password</a>. If not click the link.' in response.data
 
                     # Make a POST request to the reset password page with a new password
                     response = client.post('/reset_password/{token}', data={'password': 'newpassword', 'confirm_password': 'newpassword'}, follow_redirects = True)
